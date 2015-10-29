@@ -1,0 +1,19 @@
+{
+  "name": "ws-rpi-discover",
+  "version": "1.0.0",
+  "description": "",
+  "main": "discover.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/henrikkorsgaard/ws-rpi-discover.git"
+  },
+  "author": "Henrik Korsgaard",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/henrikkorsgaard/ws-rpi-discover/issues"
+  },
+  "homepage": "https://github.com/henrikkorsgaard/ws-rpi-discover#readme"
+}
