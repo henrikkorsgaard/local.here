@@ -5,7 +5,10 @@ This is a thin webstrate client intended for devices such as Raspberry PI's and 
 
 `phantom-ws.js` should be run with Phantomjs and takes a configuration file, e.g. `phantomjs phantom-ws.js webstrate.conf`. The configuration file should contain the following:
 ```
-
+webstrate_name=<DEVICE id>
+server=<your favorite webstrate server>
+login=<you>
+password=<1234>
 ```
 
 ## tentative convetions
