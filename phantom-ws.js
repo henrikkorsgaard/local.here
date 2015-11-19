@@ -3,22 +3,13 @@ var page = require('webpage').create(),
     system = require('system');
 
 (function(){
-    'use strict';
-
+    var content,
+        file,
+        config;
     if (system.args.length < 2) {
         console.log("Error: Need server configuration file (e.g.: phantom-ws.js config.conf)");
         phantom.exit(1);
     }
-
-    var content = '',
-        config = {},
-        keyPair,
-        i,
-        len,
-        file = null,
-        lines = null,
-        eol = system.os.name == 'windows' ? "\r\n" : "\n",
-        webstrate_url;
 
     try {
         file = fs.open(system.args[1], "r");
@@ -34,12 +25,7 @@ var page = require('webpage').create(),
     }
 
     if (content) {
-        lines = content.split(eol);
-        len = lines.length;
-        for (i = 0; i < len; i++) {
-            keyPair = lines[i].split('=');
-            config[keyPair[0]] = keyPair[1];
-        }
+        config = JSON.parse(content);
     } else {
         console.log("ERROR: Cannot read configuration file!");
         phantom.exit(1);
@@ -47,9 +33,8 @@ var page = require('webpage').create(),
 
     page.settings.userName = config.login;
     page.settings.password = config.password;
-    webstrate_url = config.server + '/' + config.webstrate_name;
 
-    page.open(webstrate_url, function(status) {
+    page.open(config.server + '/' + config.webstrate, function(status) {
         if (status !== 'success') {
             console.log('ERROR: Unable to load', address);
             phantom.exit(1);
@@ -59,9 +44,8 @@ var page = require('webpage').create(),
     page.onInitialized = function() {
         page.onCallback = function(data) {
             if (data.event === 'loaded') {
-                console.log("webstrate loaded");
             } else if (data.event === 'transcluded') {
-                console.log("transcluded webstrate loaded");
+            } else if (data.event === 'error'){
             }
         };
 
@@ -74,12 +58,12 @@ var page = require('webpage').create(),
             document.addEventListener('transcluded', function() {
                 window.callPhantom({"event":"transcluded"});
             }, false);
-          });
+        });
     };
 
     page.onError = function(error, trace) {
+        //I need a general error handler -- on error, on exit, on termination of phantomjs process. !powershut!
         console.log(error);
         phantom.exit(1);
     };
-    
 })();

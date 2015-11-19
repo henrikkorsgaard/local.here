@@ -1,0 +1,100 @@
+<html><head></head><body>
+<events class="RPI-basic-api"></events>
+<script id="rpi-client-script">'use strict';
+(function () {
+    function sendCommand(cmd){
+        if(document.querySelector('.RPI-basic-api')){
+           	let config = {childList: true};
+           	let eQueue = document.querySelector('.RPI-basic-api');
+           	let observer = new MutationObserver(function(mutations) {
+               	mutations.forEach(function(mutation) {
+                  	if(mutation.addedNodes > 0){
+                    	console.log("node added");
+                    }
+          		});
+           	});
+			let cmdEvent = document.createElement('event');
+          	cmdEvent.className = 'RPI-command';
+          	cmdEvent.innerHTML = cmd;
+         	eQueue.appendChild(cmdEvent);
+           	observer.observe(eQueue, config);
+		}
+	}
+	document.addEventListener('loaded', function(e) {
+      	setTimeout(function(){
+        	sendCommand('ls');
+        }, 2000);
+    });
+}());
+</script>
+<script id="rpi-script">
+'use strict';
+(function(){
+    function rpi(){
+        window.WebSocket = window.WebSocket || window.MozWebSocket;
+        let ws, eQueue, config = {childList: true};
+
+        try {
+            ws = new WebSocket('ws://127.0.0.1:3030');
+        } catch (e) {
+            console.log(e);
+        }
+
+        ws.onopen = function(){
+            if(!document.querySelector('.RPI-basic-api')){
+                document.body.innerHTML += '<events class="RPI-basic-api"></events>';
+            }
+            eQueue = document.querySelector('.RPI-basic-api');
+            observer.observe(eQueue, config);
+        };
+
+        ws.onmessage = function(msg){
+            try {
+                let json = JSON.parse(msg.data);
+              	let responseEvent = document.createElement('event');
+              	responseEvent.className = 'RPI-response';
+
+              	for(let key in json){
+                	responseEvent.innerHTML += '<'+key+'>'+json[key]+'</'+key+'>';
+                }
+				eQueue.appendChild(responseEvent);
+
+            } catch (e) {
+                console.log('Not valid JSON(?): ', msg.data);
+                return;
+            }
+        }
+
+        ws.onerror = function (err) {
+            observer.disconnect();
+            eQueue.innerHTML = '';
+        };
+
+        ws.onclose = function(){
+            observer.disconnect();
+            eQueue.innerHTML = '';
+        };
+
+      	let observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+            	if(mutation.addedNodes.length > 0 && mutation.addedNodes[0].className == 'RPI-command'){
+                  	try {
+                    	ws.send(mutation.addedNodes[0].innerHTML);
+                      	mutation.addedNodes[0].parentNode.removeChild(mutation.addedNodes[0]);
+                	} catch (e) {
+                      	console.log("websockets not open") //what happens here? (should be open - check line 18!
+                    	console.log(e)
+                    }
+                }
+            });
+        });
+    }
+
+    document.addEventListener('loaded', function(e) {
+        rpi();
+    });
+
+}());
+</script>
+</body>
+</html>

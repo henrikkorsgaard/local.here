@@ -1,7 +1,7 @@
 # Webstrate PI
 ### Note: Work in Progress - see [Webstrates](https://github.com/cklokmose/Webstrates) for everything!
 
-This is a thin webstrate client intended for devices such as Raspberry PI's and similar. It uses [Phantomjs](http://phantomjs.org/) to open a webstrate and link this to a particular device. 
+This is a thin webstrate client intended for devices such as Raspberry PI's and similar. It uses [Phantomjs](http://phantomjs.org/) to open a webstrate and link this to a particular device.
 
 `phantom-ws.js` should be run with Phantomjs and takes a configuration file, e.g. `phantomjs phantom-ws.js webstrate.conf`. The configuration file should contain the following:
 ```
@@ -18,7 +18,7 @@ The architecture/pattern emphasises an extremly thin webstrate for the device (n
 
 The initial architecture is intended as follows:
 
-\DEVICENAME_id 
+\DEVICENAME_id
 ```
 <html>
   <body>
@@ -30,13 +30,18 @@ The initial architecture is intended as follows:
 
 This allows us to do several things with the device: We can develop webstrates seperately, transclude (multiple) api's, deploy to multiple devices, seperate api from other webstrates.
 
-# Setting up the RPI image
+## Setting up the RPI image
 
 1. [Get the latest debian distro for the Raspberry PI](https://www.raspberrypi.org/downloads/raspbian/)
 2. Optional cleanup - see [here](http://blog.samat.org/2015/02/05/slimming-an-existing-raspbian-install/)
 3. Install latest [Node js](http://node-arm.herokuapp.com/) (we might not need it for now, tho).
-4. Build [Phantomjs](http://phantomjs.org/build.html)
+4. Build [Phantomjs](http://phantomjs.org/build.html)(remeber the swap size issue) or use the bin above (build for ARMv6 HF).
+
+## Setting up tshark
+
+1. `sudo apt-get install tshark`
+2. `sudo chgrp <pi root> /usr/bin/dumpcap`
+3.
 
 # License
 This work is licensed under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
-

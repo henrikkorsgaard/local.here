@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/henrikkorsgaard/ws-rpi-discover/issues"
   },
-  "homepage": "https://github.com/henrikkorsgaard/ws-rpi-discover#readme"
+  "homepage": "https://github.com/henrikkorsgaard/ws-rpi-discover#readme",
+  "dependencies": {
+    "websocket": "^1.0.22"
+  }
 }
