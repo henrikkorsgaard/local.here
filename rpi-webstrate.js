@@ -10,6 +10,12 @@ let server = http.createServer(function(req, res){});
 
 server.listen(3030, function(){});
 
+// I NEED SOMETHING TO HANLE PERMISSIONS
+// GETDEVICES : IP, MAC & SIGNAL STRENGTH
+
+//IT HAS TO BE AN INDEPENDENT SERVICE (GOING BIG MIGHT BE LIPCAP; ARP-SCAN ETC:)
+
+
 // create the server
 let ws = new WebSocketServer({
     httpServer: server
