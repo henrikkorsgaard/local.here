@@ -3,7 +3,6 @@
 'use strict';
 let fs = require('fs'),
 child_process = require('child_process');
-
 let configFile = (process.argv[2] && process.argv[2].indexOf('.conf') === process.argv[2].length - 5) ? process.argv[2] : 'webstrate-pi.conf';
 let config;
 let phantom_process;
@@ -21,10 +20,11 @@ fs.readFile(configFile, 'utf8', function(err, data){
     }
 });
 
+
 function init(){
 
     //setupBrowser();
-
+	
     config.api_list.forEach(function(o){
         let api = require('./lib/'+o.name+'.js')();
         api.setPort(o.port);
@@ -33,9 +33,9 @@ function init(){
         });
         api.init();
     });
-
 }
- function setupBrowser(){
+
+function setupBrowser(){
     phantom_process = child_process.spawn('phantomjs',['./scripts/phantom-pi-ws.js', JSON.stringify(config)]);
 
     phantom_process.stdout.on('data', function (data) {

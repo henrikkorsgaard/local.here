@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/henrikkorsgaard/ws-rpi-discover#readme",
   "dependencies": {
+    "mongoose": "^4.2.7",
     "pcap": "git+https://github.com/mranney/node_pcap.git",
     "websocket": "^1.0.22"
   }
