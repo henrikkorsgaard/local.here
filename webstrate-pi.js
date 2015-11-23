@@ -4,7 +4,7 @@
 let fs = require('fs'),
 child_process = require('child_process');
 
-let configFile = (process.argv[2] && process.argv[2].indexOf('.conf') === process.argv[2].length - 5) ? process.argv[2] : './webstrate-pi.conf';
+let configFile = (process.argv[2] && process.argv[2].indexOf('.conf') === process.argv[2].length - 5) ? process.argv[2] : 'webstrate-pi.conf';
 let config;
 let phantom_process;
 let APIs = [];
@@ -23,10 +23,11 @@ fs.readFile(configFile, 'utf8', function(err, data){
 
 function init(){
 
-    setupBrowser();
+    //setupBrowser();
 
     config.api_list.forEach(function(o){
         let api = require('./lib/'+o.name+'.js')();
+        api.setPort(o.port);
         api.addEventListener(function(e){
             console.log(e);
         });
