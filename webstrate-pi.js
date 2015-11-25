@@ -4,16 +4,6 @@
     'use strict';
 	
 	let proxiDB = require( './lib/db.js' )();
-	proxiDB.getAllDevices(function(err, result){
-		console.log(err);
-		console.log(result);
-	});
-	
-	let proxiDB2 = require( './lib/db.js' )();
-	proxiDB.getAllDevices(function(err, result){
-		console.log(err);
-		console.log(result);
-	});
 	
 	//TOOD: MAKE DB INSTANCE A SINGLETON OR MAKE IT DEAL OUT POOLS!
 	
@@ -36,7 +26,7 @@
 	
 	
 	// WORKING ATM
-	/*
+	
     let proximity = require('./lib/services/proximity.js')();
     proximity.on('ready', function(e){
         console.log(e);
@@ -50,7 +40,7 @@
     proximity.on('terminated', function(e){
         console.log(e)
     });
-	*/
+	
 	
 
     /*
