@@ -9,6 +9,12 @@
 		console.log(result);
 	});
 	
+	let proxiDB2 = require( './lib/db.js' )();
+	proxiDB.getAllDevices(function(err, result){
+		console.log(err);
+		console.log(result);
+	});
+	
 	//TOOD: MAKE DB INSTANCE A SINGLETON OR MAKE IT DEAL OUT POOLS!
 	
 	//WORKING ATM
