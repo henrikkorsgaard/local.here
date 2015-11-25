@@ -42,6 +42,7 @@ page.onInitialized = function () {
                       ipEl.innerHTML = ip;
                     } else {
                       ipEl = doc.createElement('div');
+					  ipEl.id = 'ip';
                       ipEl.innerHTML = ip;
                       doc.body.appendChild(ipEl);
                     }
