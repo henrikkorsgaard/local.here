@@ -2,7 +2,17 @@
 ( function () {
 
     'use strict';
-
+	
+	let proxiDB = require( './lib/db.js' )();
+	proxiDB.getAllDevices(function(err, result){
+		console.log(err);
+		console.log(result);
+	});
+	
+	//TOOD: MAKE DB INSTANCE A SINGLETON OR MAKE IT DEAL OUT POOLS!
+	
+	//WORKING ATM
+	/*
     let phantom = require('./lib/services/phantom.js')();
     phantom.on('ready', function(e){
         phantom.start();
@@ -15,8 +25,27 @@
     phantom.on('terminated', function(e){
         console.log(e)
     });
+	*/
+	
+	
+	
+	// WORKING ATM
+	/*
+    let proximity = require('./lib/services/proximity.js')();
+    proximity.on('ready', function(e){
+        console.log(e);
+		proximity.start();
+    });
 
+    proximity.on('error', function(e){
+        console.log(e)
+    });
 
+    proximity.on('terminated', function(e){
+        console.log(e)
+    });
+	*/
+	
 
     /*
     let fs = require( 'fs' ),
