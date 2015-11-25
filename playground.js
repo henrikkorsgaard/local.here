@@ -1,5 +1,31 @@
 (function(){
     'use strict'
+    let os = require('os');
+    let exec = require( 'child_process' ).exec;
+    let interfaces = os.networkInterfaces();
+    let ip;
+    let ip2;
+    let start1 = new Date().getTime();
+    console.log(start1);
+    for(let iface in interfaces ){
+        let ifaceData = interfaces[iface];
+        for(let i in ifaceData){
+          if(!ifaceData[i].internal && ifaceData[i].family === 'IPv4'){
+              ip = ifaceData[i].address;
+              break;
+          }
+        }
+    }
+    console.log("JSON way :"+(new Date().getTime()-start1));
+    let start2 = new Date().getTime();
+    console.log(start2);
+    exec('ifconfig', function(err, stdout, stderr){
+        console.log(stdout);
+        console.log("Exec way :"+(new Date().getTime()-start2));
+    });
+
+
+    /*
     let http = require('http');
     http.createServer(function (req, res) {
         let request_ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress; //Forced as IPv6
@@ -40,4 +66,5 @@
         //search database for a matching device based on the ip
         callback("not implemented", undefined);
     }
+    */
 }());

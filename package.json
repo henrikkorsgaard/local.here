@@ -19,6 +19,7 @@
   "dependencies": {
     "mongoose": "^4.2.7",
     "pcap": "git+https://github.com/mranney/node_pcap.git",
+    "ursa": "^0.9.1",
     "websocket": "^1.0.22"
   }
 }
