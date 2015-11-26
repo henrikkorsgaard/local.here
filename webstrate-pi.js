@@ -2,11 +2,7 @@
 ( function () {
 
     'use strict';
-	
-	let proxiDB = require( './lib/db.js' )();
-	
-	//TOOD: MAKE DB INSTANCE A SINGLETON OR MAKE IT DEAL OUT POOLS!
-	
+    console.log("dlkjsjd")
 	//WORKING ATM
 	/*
     let phantom = require('./lib/services/phantom.js')();
@@ -22,11 +18,22 @@
         console.log(e)
     });
 	*/
-	
-	
-	
+
+  let server = require('./lib/services/server.js')();
+  server.on('ready', function(e){
+      console.log(e);
+  });
+
+  server.on('error', function(e){
+      console.log(e)
+  });
+
+  server.on('terminated', function(e){
+      console.log(e)
+  });
+
 	// WORKING ATM
-	
+	/*
     let proximity = require('./lib/services/proximity.js')();
     proximity.on('ready', function(e){
         console.log(e);
@@ -40,8 +47,8 @@
     proximity.on('terminated', function(e){
         console.log(e)
     });
-	
-	
+
+	*/
 
     /*
     let fs = require( 'fs' ),
