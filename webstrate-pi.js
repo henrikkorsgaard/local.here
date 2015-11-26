@@ -18,7 +18,7 @@
         console.log(e)
     });
 	*/
-
+	/*
   let server = require('./lib/services/server.js')();
   server.on('ready', function(e){
       console.log(e);
@@ -31,7 +31,7 @@
   server.on('terminated', function(e){
       console.log(e)
   });
-
+	*/
 	// WORKING ATM
 	/*
     let proximity = require('./lib/services/proximity.js')();
