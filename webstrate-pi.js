@@ -2,7 +2,7 @@
 ( function () {
 
     'use strict';
-    console.log("dlkjsjd")
+
 	//WORKING ATM
 	/*
     let phantom = require('./lib/services/phantom.js')();
@@ -33,7 +33,7 @@
   });
 	*/
 	// WORKING ATM
-	/*
+
     let proximity = require('./lib/services/proximity.js')();
     proximity.on('ready', function(e){
         console.log(e);
@@ -48,7 +48,7 @@
         console.log(e)
     });
 
-	*/
+
 
     /*
     let fs = require( 'fs' ),

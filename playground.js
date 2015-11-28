@@ -3,19 +3,21 @@
     let crypto = require('cryptico');
     let db = require( './lib/db.js' )();
 	
-	db.getAllDevices(function(err, result){
-		console.log(err);
-		console.log(result);
-		
-	});
-	
-	db.getDevice('92.168.1.123',function(err, result){
-		console.log(err);
-		console.log(result);
-		
+	db.getDevice('192.168.1.123',function(err, result){
+		if(result){
+			console.log(result);
+			console.log(result.signal);			
+			
+			let privateKey = crypto.generateRSAKey("test er lige de her", 512);
+			let publicKey = crypto.publicKeyString(privateKey);
+			console.log(publicKey);
+			console.log("hep");
+		} else {
+			console.log("result was null");
+		}
+
+		process.exit();
 	});
 
-    //let privateKey = crypto.generateRSAKey("192.168.1.1:SOME MAC ADDRESS", 1024);
-    //let publicKey = crypto.publicKeyString(privateKey);
-    //console.log(publicKey);
+    
 }());
