@@ -19,7 +19,6 @@
   "dependencies": {
     "cryptico": "^1.0.2",
     "mongoose": "^4.2.7",
-    "pcap": "git+https://github.com/mranney/node_pcap.git",
     "websocket": "^1.0.22"
   }
 }

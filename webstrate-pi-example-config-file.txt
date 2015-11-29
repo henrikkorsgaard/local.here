@@ -1,0 +1,12 @@
+#This is an example of a basic configuration file for the webstrate-pi service
+#Fill in the information and rename it to .conf in the webstrate-pi dir and it will be used to configure the components for the service
+#You can also copy this to the boot partition on the PI sd card (and make it easy to change during setup). Here the file should be called webstrate-pi.conf.
+#This file will be used to generate local configurations for the service.
+
+
+webstrate_server=<your favorite webstrate server>
+webstrate_login=<login>
+webstrate_password=<password>
+webstrate=<name of the webstrate that is linked to the Raspberry PI>
+ssid=<your WPA protected network ssid>
+wifi_password=<password for the network above>
