@@ -20,6 +20,7 @@ else
 	wpa_passphrase $ssid $wifi_password > /etc/wpa_supplicant/wpa_supplicant.conf
 	sudo /etc/init.d/networking restart
 	ifup wlan0
+	sleep 5
 fi
 
 if [ -n "$(ifconfig | grep mon0)" ]

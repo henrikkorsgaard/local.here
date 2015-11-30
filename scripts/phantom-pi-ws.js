@@ -5,18 +5,18 @@ var args = system.args;
 var config;
 try {
     config = JSON.parse( args[ 1 ] );
-    console.log("Setting up webstrate "+config.server+"/"+config.webstrate +" on phantomjs with the following PI ip: "+ config.ip );
+    console.log("Setting up webstrate "+config.webstrate_server+"/"+config.webstrate +" on phantomjs with the following PI ip: "+ config.ip );
 } catch ( e ) {
     console.error('Unable to parse the config parameters from <'+args+'>');
     phantom.exit( 1 );
 }
-page.settings.userName = config.login;
-page.settings.password = config.password;
+page.settings.userName = config.webstrate_login;
+page.settings.password = config.webstrate_password;
 
 
-page.open( config.server + '/' + config.webstrate, function ( status ) {
+page.open( config.webstrate_server + '/' + config.webstrate, function ( status ) {
     if ( status !== 'success' ) {
-        console.error('Unable to connection to the webstrate server <'+config.webstrate+'>');
+        console.error('Unable to connection to the webstrate server <'+config.webstrate_server+'>');
         phantom.exit( 1 );
     }
 } );
@@ -24,7 +24,7 @@ page.open( config.server + '/' + config.webstrate, function ( status ) {
 page.onInitialized = function () {
     page.onCallback = function ( data ) {
         if ( data.event === 'loaded' ) {
-            console.log( "Phantom loaded the "+config.webstrate+" webstrate on "+config.server);
+            console.log( "Phantom loaded the "+config.webstrate+" webstrate on "+config.webstrate_server);
         } else if ( data.event === 'api loaded' ) {
             console.log( "Phantom loaded the webstrate api for /"+config.webstrate+" on /"+config.webstrate + "_api");
         }
