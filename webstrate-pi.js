@@ -23,15 +23,6 @@ let fs = require( 'fs' ),
 	
 	function init(){
 		
-		let db = require('./lib/db.js')();
-		console.log(db);
-		
-		db.getAllDevices(function(err, result){
-			console.log(err);
-			console.log(result);
-		});
-		
-		
 		/*
 	    let proximity = require('./lib/services/proximity.js')(config);
 	    proximity.on('ready', function(e){
@@ -46,7 +37,7 @@ let fs = require( 'fs' ),
 	        console.log(e)
 	    });
 		*/
-		/*
+		
 	    let phantom = require('./lib/services/phantom.js')(config);
 	    phantom.on('ready', function(e){
 	    	console.log(e);
@@ -59,7 +50,7 @@ let fs = require( 'fs' ),
 	    phantom.on('terminated', function(e){
 	        console.log(e);
 	    });
-		*
+		
 		/*
 	    let server = require('./lib/services/server.js')(config);
 	    server.on('ready', function(e){
