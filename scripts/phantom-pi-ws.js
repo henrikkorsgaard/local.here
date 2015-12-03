@@ -82,12 +82,7 @@ page.onInitialized = function () {
     }, config.webstrate, config.ip);
 };
 
-page.onConsoleMessage = function ( msg, lineNum, sourceId ) {
-    console.log( 'CONSOLE: ' + msg + ' (from line #' + lineNum + ' in "' + sourceId + '")' );
-};
-
 page.onError = function ( msg, trace ) {
-    console.log(msg);
-    console.log("Error on page - unable to render");
+    console.error("Error on page - unable to render page. Error " + msg);
     phantom.exit(1);
 };

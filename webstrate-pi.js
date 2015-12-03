@@ -1,69 +1,55 @@
 /*global console, process, require*/
 ( function () {
-    'use strict';
-	
+        'use strict';
+        let fs = require( 'fs' );
+        let spawn = require( 'child_process' ).spawn;
 
-let fs = require( 'fs' ),
-    spawn = require( 'child_process' ).spawn;
-	let configFile = ( process.argv[ 2 ] && process.argv[ 2 ].indexOf( '.conf' ) === process.argv[ 2 ].length - 5 ) ? process.argv[ 2 ] : 'webstrate-pi-local-configuration.conf';
-	let config;
+        let numberOfRetrys = 5; //The number of times any service should be restarted before full termination.
+        let retryInterval = 60000; //The interval between a crash and then a retry
+        let config;
+        let server, scanner, phantomjs; //THe processes.
+
+        
+
+        function initiateServer() {
+            //if error -> timeout
+        }
+
+        function initiateProximityScanner() {
+
+        }
+
+        function initiatiePhantomJS() {
+            phantomjs = spawn( 'phantomjs', [ '--web-security=no', '/scripts/phantom-pi-ws.js', JSON.stringify( config ) ] );
+
+            phantomjs.stdout.on( 'data', function ( data ) {
+                let msg = data.toString();
+                console.log( msg );
+            } );
+
+            phantomjs.stderr.on( 'data', function ( data ) {
+                let err = data.toString();
+                console.log( err );
+            } );
+
+            phantomjs.on( 'error', function ( err ) {
+                console.log( err );
+            } );
+
+            phantomjs.on( 'close', function ( code ) {
+                console.log( "closed with code " + code );
+            } );
+        }
+
+        function terminate() {
+            //SEND KILL TO ALL THE PROCESSES.
+            //LOG TO /boot/webstrate-pi-error.log
+            //process.exit(1);
+        }
 
 
-	fs.readFile( configFile, 'utf8', function ( err, data ) {
-    	try {
-        	if ( err ) { throw err; }
-			config = JSON.parse( data );
-			
-		} catch ( err ) {
-        	console.error( "Unable to read configuration file <" + configFile + "> Error: " + err );
-        	process.exit( 1 );
-    	}
-		init();
-	} );
-	
-	function init(){
-		
-		/*
-	    let proximity = require('./lib/services/proximity.js')(config);
-	    proximity.on('ready', function(e){
-	        console.log(e);
-	    });
 
-	    proximity.on('error', function(e){
-	        console.log(e)
-	    });
 
-	    proximity.on('terminated', function(e){
-	        console.log(e)
-	    });
-		*/
-		
-	    let phantom = require('./lib/services/phantom.js')(config);
-	    phantom.on('ready', function(e){
-	    	console.log(e);
-	    });
-
-	    phantom.on('error', function(e){
-	        console.log(e);
-	    });
-
-	    phantom.on('terminated', function(e){
-	        console.log(e);
-	    });
-		
-		/*
-	    let server = require('./lib/services/server.js')(config);
-	    server.on('ready', function(e){
-	        console.log(e);
-	    });
-
-	    server.on('error', function(e){
-	        console.log(e)
-	    });
-
-	    server.on('terminated', function(e){
-	        console.log(e)
-	    });*/
-	}
+    }
 
 }() );

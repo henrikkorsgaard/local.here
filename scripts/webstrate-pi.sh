@@ -26,7 +26,7 @@ fi
 if [ -n "$(ifconfig | grep mon0)" ]
 then
 	echo "Monitor device (mon0) already up!"
-else 
+else
 	echo "Setting up monitor device (mon0)"
 	iw wlan0 interface add mon0 type monitor
 	ip link set mon0 up
@@ -44,7 +44,7 @@ then
 	echo "ERROR: Unable to verify device ip. This is essentail to running the service. Are you sure that wlan0 is set up and has an ip?"
 	exit
 elif [ -z "$broadcast" ]
-then 
+then
 	echo "ERROR: Unable to obtain the broadcast address of the network. This is essentail to running the service. Are you sure that wlan0 is set up and able to connect to station: $ssid?"
 	exit
 elif [ -z "$mac" ]
@@ -59,7 +59,7 @@ elif [ -z "$station_mac" ]
 then
 	echo "ERROR: Unable to obtain station mac address. This is essentail to running the service. Are you sure that wlan0 is set up and able to connect to station: $ssid?"
 	exit
-else 
+else
 	echo "Generating the local settings and writing to file: webstrate-pi-local.settings"
 	echo "{\"ATTENTION\":\"THIS SETTINGS FILE IS AUTO-GENERATE BY THE STARTUP SCRIPT AND SHOULD NOT BE EDITED\", \"webstrate_server\": \"$webstrate_server\", \"webstrate_login\": \"$webstrate_login\",\"webstrate_password\": \"$webstrate_password\", \"webstrate\": \"$webstrate\", \"ssid\": \"$ssid\", \"ip\": \"$ip\", \"mac\": \"$mac\", \"broadcast\": \"$broadcast\", \"station_ip\": \"$station_ip\", \"station_mac\": \"$station_mac\"}" > ../webstrate-pi-local-configuration.conf
 

@@ -19,6 +19,6 @@
   "dependencies": {
     "cryptico": "^1.0.2",
     "mongoose": "^4.2.7",
-    "websocket": "^1.0.22"
+    "ws": "^0.8.1"
   }
 }

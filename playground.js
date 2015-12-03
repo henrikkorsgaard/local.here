@@ -1,74 +1,84 @@
 'use strict'
-let WebSocketServer = require('websocket').server;
-let http = require('http');
 
-let server = http.createServer(function(request, response) {
-   	//http server is not really used!
+let token = require( './lib/models/token.js' );
+let device = require( './lib/models/device.js' );
+
+let d = {
+    mac: "c0:56:27:6d:3d:83",
+    signal: undefined,
+    mac_resolved: "Test device",
+    ip: "192.168.1.101",
+    name: "Test device"
+};
+
+
+//device.purge();
+
+/*
+
+let c = 0;
+
+let timer = setInterval( function () {
+    if ( c === 10 ) {
+        device.removeDevice( d, function ( err, result ) {
+            console.log( err );
+            console.log( result );
+        } );
+    } else if ( c === 20 ) {
+        device.removeDevice( d, function ( err, result ) {
+            console.log( err );
+            console.log( result );
+        } );
+    } else if ( c === 30 ) {
+        device.removeDevice( d, function ( err, result ) {
+            console.log( err );
+            console.log( result );
+        } );
+    } else if ( c === 40 ) {
+        device.removeDevice( d, function ( err, result ) {
+            console.log( err );
+            console.log( result );
+        } );
+    } else if (c === 50){
+
+      clearTimeout(timer);
+      process.exit();
+    }
+    d.signal = Math.floor( Math.random() * 100 );
+    device.upsertDevice( d, function ( err, result ) {
+        console.log( err );
+        console.log( result );
+    } );
+    console.log( "ping" );
+    c++;
+}, 500 );
+
+/*
+token.createToken('192.168.1.123', 4, function(err, token){
+    console.log(err);
+    console.log(token);
+});*/
+/*
+token.validateToken("rOKBcO5jfD6POB6JQNNZ+vBLehQCCnvfGw9IBYiV2fmoB6HmzHRg6CUo/nLrtVKkXqssAazvgxRwncRbah3QAeOTqtjZybhL7Jd4qn01S+9/QqyHyzrkXM2DryC7sc4i22mFS0fP/QqKuKzjIqshFR37Q1zWOn3TEuipZTag0sM=", function(err, valid){
+    console.log(err);
+    console.log(valid);
 });
-server.listen(1337, function() { });
+*/
+/*
+token.createToken("dhsakjdh", 3, function(err, result){
 
-// create the server
-let wsServer = new WebSocketServer({
-    httpServer: server
+
+});
+/*
+let server = require('./lib/server.js');
+
+server.on('change', function(e){
+    console.log(e);
 });
 
-
-
-let api = {
-	"api": {"description":"Sending {request: api} will return a description of the API,", "access":["local", "token", "all"], "status":"experimental", "parameters": "none","function":function(connection, request){
-		let response = [];
-		
-		for (let a in api){
-			response.push({"API name": a, "Description": api[a].description, "Access": api[a].access, "Status": api[a].status, "Request parameters": api[a].parameters});
-		}
-		connection.sendUTF(JSON.stringify(response));
-	}},
-	"pi": {"description":"Sending {request: pi} will return information on the particular PI", "access":["local", "token"], "status":"under development", "parameters": "none","function":function(connection, request){
-		
-	}},
-	"device":{"description":"Sending {request: device} will return information on a particular device - based on ip (or mac address as parameter.", "access":["local", "token"], "status":"under development", "parameters": "[MAC address]","function":function(connection, request){
-		
-	}},
-	"token": {"description":"Sending {request: token} will return a token that allow some interaction with the PI from outside the current local area wifi network. Default token time is 4 hours", "access":["local"], "status":"under development", "parameters": undefined,"function":function(connection, request){
-		
-	}},
-	"devices":{"description":"Sending {request: devices} will return a list of the devices on the same network as the PI", "access":["local"], "status":"under development", "parameters": "none", "function":function(connection, request){
-		
-	}},
-	"command":{"description":"Sending {request: command} will evaluate a unix command in the PI shell via nodejs child_process spawn.", "access":["local", "token"], "status":"under development", "parameters": "[command]","function":function(connection, request){
-	}}
-}
-
-// WebSocket server
-wsServer.on('request', function(req) {
-	let ipRE = new RegExp( /\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/g );
-	let connection;
-	let ip = req.remoteAddress.match(ipRE)[0];
-
-	if(req.origin === 'http://webstrates.cs.au.dk' && ip){ //THIS SHOULD BE A COMPARISON WITH config.webstrate_server
-		connection = req.accept(null, req.origin);
-	} else {
-		req.reject(503, "Illigal origin - only accepting PI webstrate origin"); 
-	}
-	
-    // This is the most important callback for us, we'll handle
-    // all messages from users here.
-    connection.on('message', function(message) {
-        if (message.type === 'utf8') {
-			try {
-				let apiRequest = JSON.parse(message.utf8Data);
-				if(api[apiRequest.request]){
-					api[apiRequest.request].function(connection, apiRequest);
-				} else {
-					connection.sendUTF(JSON.stringify( {"type":"error", "msg":"api request not found", "original request": apiRequest.request}));
-				}
-			} catch(e){
-				console.log(e)
-			}
-        }
-    });
-
-    connection.on('close', function(connection) {
-        // close user connection
-    });
+server.on('error', function(err){
+    console.log(err);
 });
+
+server.listen(1337);
+*/
