@@ -52,4 +52,7 @@
                 console.log( "closed with code " + code );
             } );
         }
+
+        initiatiePhantomJS();
+        initiateServer();
 }());
