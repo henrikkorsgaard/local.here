@@ -54,16 +54,4 @@
                 console.log( "closed with code " + code );
             } );
         }
-
-        function terminate() {
-            //SEND KILL TO ALL THE PROCESSES.
-            //LOG TO /boot/webstrate-pi-error.log
-            //process.exit(1);
-        }
-
-
-
-
-    }
-
-}() );
+}());
