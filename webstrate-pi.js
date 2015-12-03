@@ -1,5 +1,8 @@
 /*global console, process, require*/
 ( function () {
+
+
+        //SHOULD HANDLE FATAL DB ERRORS HERE! -> try a connection, then close!
         'use strict';
         let fs = require( 'fs' );
         let spawn = require( 'child_process' ).spawn;
@@ -9,10 +12,21 @@
         let config;
         let server, scanner, phantomjs; //THe processes.
 
-        
+
 
         function initiateServer() {
-            //if error -> timeout
+          server = require('./lib/server.js');
+
+          server.on('change', function(e){
+              console.log(e);
+          });
+
+          server.on('error', function(err){
+              console.log(err);
+          });
+
+          server.listen(1337);
+
         }
 
         function initiateProximityScanner() {
