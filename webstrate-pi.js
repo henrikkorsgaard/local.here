@@ -1,7 +1,5 @@
 /*global console, process, require*/
 ( function () {
-
-
         //SHOULD HANDLE FATAL DB ERRORS HERE! -> try a connection, then close!
         'use strict';
         let fs = require( 'fs' );
