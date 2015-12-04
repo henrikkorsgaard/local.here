@@ -33,13 +33,13 @@
             serverConfig[ 'webstrate_server' ] = config[ 'webstrate_server' ];
 
             scannerConfig = {};
+			scannerConfig['station_mac'] = config['station_mac'];
+			scannerConfig['broadcast'] = config['broadcast'];
+			scannerConfig['ssid'] = config['ssid'];
             
-            /*
+			initiateProximityScanner();
             initiatiePhantomJS();
-
             initiateServer();
-            */
-
         }
     } );
 
@@ -80,7 +80,17 @@
     }
 
     function initiateProximityScanner() {
+        scanner = require( './lib/proximity.js' );
 
+        scanner.on( 'change', function ( e ) {
+            console.log( e );
+        } );
+
+        scanner.on( 'error', function ( err ) {
+            console.log( err );
+        } );
+
+        scanner.start( scannerConfig );
     }
 
     function initiatiePhantomJS() {
