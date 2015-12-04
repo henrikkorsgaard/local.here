@@ -32,6 +32,16 @@ page.onInitialized = function () {
 
     page.evaluate( function (ws, ip) {
         document.addEventListener( 'loaded', function () {
+			var log = document.getElementById(ws+'_console');
+			if(log){
+				log.innerHTML = '';
+				log.style.display = 'none';
+			} else {
+				log = document.createElement('div');
+				log.id = ws+'_console';
+				log.style.display = 'none';
+				document.body.appendChild(log);
+			}
             var iframe = document.getElementById( ws + '_api' );
             if ( iframe ) {
                 iframe.setAttribute( 'ip', ip );
@@ -82,7 +92,16 @@ page.onInitialized = function () {
     }, config.webstrate, config.ip);
 };
 
+page.onConsoleMessage = function(msg) {
+	var consoleMsg = 'CONSOLE: ' + msg;
+	console.log(consoleMsg);
+	page.evaluate(function(msg, ws){
+		var log = document.getElementById(ws+'_console');
+		log.innerHTML += '<div>'+msg+'</div>';
+	}, consoleMsg, config.webstrate);
+};
+
 page.onError = function ( msg, trace ) {
-    console.error("Error on page - unable to render page. Error " + msg);
-    phantom.exit(1);
+	console.error("Error on page - unable to render page. Error " + msg);
+	phantom.exit(1);
 };

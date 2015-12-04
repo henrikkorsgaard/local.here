@@ -39,6 +39,11 @@ mac="$(ifconfig wlan0 | grep -o -E '([[:xdigit:]]{1,2}:){5}[[:xdigit:]]{1,2}')"
 station_ip="$(arp -a| grep $ssid | grep -Eo -m 1 '([0-9]*\.){3}[0-9]*')"
 station_mac="$(iw dev wlan0 link | grep -o -E '([[:xdigit:]]{1,2}:){5}[[:xdigit:]]{1,2}')"
 
+os="$(cat /proc/version)"
+cpu="$(cat /proc/cpuinfo | grep model | grep -o ":.*" | cut -f2- -d':')"
+usb="$(lsusb | sed "s/.*/\"&\"/" | paste -sd,)"
+usb="[$usb]"
+
 if [ -z "$ip" ]
 then
 	echo "ERROR: Unable to verify device ip. This is essentail to running the service. Are you sure that wlan0 is set up and has an ip?"
@@ -61,6 +66,6 @@ then
 	exit
 else
 	echo "Generating the local settings and writing to file: webstrate-pi-local.settings"
-	echo "{\"ATTENTION\":\"THIS SETTINGS FILE IS AUTO-GENERATE BY THE STARTUP SCRIPT AND SHOULD NOT BE EDITED\", \"webstrate_server\": \"$webstrate_server\", \"webstrate_login\": \"$webstrate_login\",\"webstrate_password\": \"$webstrate_password\", \"webstrate\": \"$webstrate\", \"ssid\": \"$ssid\", \"ip\": \"$ip\", \"mac\": \"$mac\", \"broadcast\": \"$broadcast\", \"station_ip\": \"$station_ip\", \"station_mac\": \"$station_mac\"}" > ../webstrate-pi-local-configuration.conf
+	echo "{\"ATTENTION\":\"THIS SETTINGS FILE IS AUTO-GENERATE BY THE STARTUP SCRIPT AND SHOULD NOT BE EDITED\", \"webstrate_server\": \"$webstrate_server\", \"webstrate_login\": \"$webstrate_login\",\"webstrate_password\": \"$webstrate_password\", \"webstrate\": \"$webstrate\", \"ssid\": \"$ssid\", \"ip\": \"$ip\", \"mac\": \"$mac\", \"broadcast\": \"$broadcast\", \"station_ip\": \"$station_ip\", \"station_mac\": \"$station_mac\", \"os\":\"$os\", \"peripherals\":$usb, \"cpu\":\"$cpu\"}" > ../webstrate-pi-local-configuration.conf
 
 fi
