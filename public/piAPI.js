@@ -1,8 +1,8 @@
 /*global console, process, require, __filename, module*/
-( function () {
+( function (piAPI) {
     'use strict';
     console.log('API script loaded');
-    function piAPI( api_connector ) {
+    piAPI = function( api_connector ) {
         let iframe = api_connector;
         let idoc = iframe.contentDocument || iframe.contentWindow.document;
         let ip = idoc.getElementById( 'pi-ip' );
@@ -91,4 +91,4 @@
         } );
     }
     console.log(piAPI);
-}() );
+}(window.piAPI) );
