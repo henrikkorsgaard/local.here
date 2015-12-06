@@ -90,5 +90,5 @@
             pingPIViaWebstrate
         } );
     }
-
+    console.log(piAPI);
 }() );
