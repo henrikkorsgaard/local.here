@@ -57,8 +57,23 @@ page.onInitialized = function () {
                         ipEl.innerHTML = ip;
                         doc.body.appendChild( ipEl );
                     }
+					
+                    var config = {
+                        attributes: true,
+                        childList: true,
+                        characterData: true,
+						subtree: true
+                    };
+					
+                    // create an observer instance
+                    var ipObserver = new MutationObserver( function ( mutations ) {
+						ipEl.innerHTML = ip;
+                    } );
+					
+					ipObserver.observe( ipEl, config );
 
                     var target = doc.getElementById( 'pi-events' );
+					target.innerHTML = '';
 
                     if ( !target ) {
                         target = doc.createElement( 'div' );
@@ -69,18 +84,18 @@ page.onInitialized = function () {
 
                     // create an observer instance
                     var observer = new MutationObserver( function ( mutations ) {
-                        if ( mutations[ 0 ].type === 'childList' && mutations[ 0 ].addedNodes.length > 0 && mutations[ 0 ].addedNodes[ 0 ].tagName === 'PING' ) {
-                            console.log( "Got pinged from " + ws + "_api" );
-                            mutations[ 0 ].addedNodes[ 0 ].parentNode.removeChild( mutations[ 0 ].addedNodes[ 0 ] );
-                            target.innerHTML += '<pong></pong>';
-                        }
+						mutations.forEach(function(m){
+							if(m.type === 'childList' && m.addedNodes.length > 0 && m.addedNodes[0].tagName === 'PING'){
+								var eventId = m.addedNodes[0].id;
+								console.log( "Got pinged from " + ws + "_api!" );
+								if(m.addedNodes[0]){
+									m.addedNodes[0].parentNode.removeChild(m.addedNodes[0]);
+								}
+								target.innerHTML += '<pong id="'+eventId+'"></pong>';
+							}
+						});
+                        
                     } );
-
-                    var config = {
-                        attributes: false,
-                        childList: true,
-                        characterData: true
-                    };
 
                     // pass in the target node, as well as the observer options
                     observer.observe( target, config );
@@ -110,9 +125,24 @@ page.onInitialized = function () {
                         ipEl.innerHTML = ip;
                         doc.body.appendChild( ipEl );
                     }
+					
+                    // create an observer instance
+                    var ipObserver = new MutationObserver( function ( mutations ) {
+						ipEl.innerHTML = ip;
+                    } );
+					
+                    var config = {
+                        attributes: true,
+                        childList: true,
+                        characterData: true,
+						subtree: true
+                    };
+					
+					ipObserver.observe( ipEl, config );
+					
 
                     var target = doc.getElementById( 'pi-events' );
-
+					target.innerHTML = '';
                     if ( !target ) {
                         target = doc.createElement( 'div' );
                         target.id = 'pi-events';
@@ -122,18 +152,18 @@ page.onInitialized = function () {
 
                     // create an observer instance
                     var observer = new MutationObserver( function ( mutations ) {
-                        if ( mutations[ 0 ].type === 'childList' && mutations[ 0 ].addedNodes.length > 0 && mutations[ 0 ].addedNodes[ 0 ].tagName === 'PING' ) {
-                            console.log( "Got pinged from " + ws + "_api" );
-                            mutations[ 0 ].addedNodes[ 0 ].parentNode.removeChild( mutations[ 0 ].addedNodes[ 0 ] );
-                            target.innerHTML += '<pong></pong>';
-                        }
+						mutations.forEach(function(m){
+							if(m.type === 'childList' && m.addedNodes.length > 0 && m.addedNodes[0].tagName === 'PING'){
+								var eventId = m.addedNodes[0].id;
+								console.log( "Got pinged from " + ws + "_api!" );
+								if(m.addedNodes[0]){
+									m.addedNodes[0].parentNode.removeChild(m.addedNodes[0]);
+								}
+								target.innerHTML += '<pong id="'+eventId+'"></pong>';
+							}
+						});
+                        
                     } );
-
-                    var config = {
-                        attributes: false,
-                        childList: true,
-                        characterData: true
-                    };
 
                     // pass in the target node, as well as the observer options
                     observer.observe( target, config );
