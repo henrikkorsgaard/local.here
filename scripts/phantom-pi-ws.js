@@ -13,7 +13,6 @@ try {
 page.settings.userName = config.webstrate_login;
 page.settings.password = config.webstrate_password;
 
-
 page.open( config.webstrate_server + '/' + config.webstrate, function ( status ) {
     if ( status !== 'success' ) {
         console.error( 'Unable to connection to the webstrate server <' + config.webstrate_server + '>' );
@@ -32,149 +31,89 @@ page.onInitialized = function () {
 
     page.evaluate( function ( ws, ip ) {
         document.addEventListener( 'loaded', function () {
-            var log = document.getElementById( ws + '_console' );
-            if ( log ) {
-                log.innerHTML = '';
-                log.style.display = 'none';
-            } else {
-                log = document.createElement( 'div' );
-                log.id = ws + '_console';
-                log.style.display = 'none';
-                document.body.appendChild( log );
+
+            function addConsole() {
+                var log = document.getElementById( ws + '_console' );
+                if ( log ) {
+                    log.innerHTML = '';
+                } else {
+                    document.log = document.createElement( 'div' );
+                    log.id = ws + '_console';
+                }
             }
-            var iframe = document.getElementById( ws + '_api' );
-            if ( iframe ) {
-                iframe.setAttribute( 'ip', ip );
+
+            function addIframe() {
+                var iframe = document.getElementById( ws + '_api' );
+
+                if ( iframe ) {
+                    iframe.setAttribute( 'ip', ip );
+                } else {
+                    iframe = document.createElement( 'iframe' );
+                    iframe.src = '/' + ws + '_api';
+                    iframe.className = 'pi-api-connector';
+                    iframe.id = ws + '_api';
+                    iframe.seamless = true;
+                    iframe.setAttribute( 'ip', ip );
+                    document.body.appendChild( iframe );
+                }
+
                 iframe.addEventListener( 'transcluded', function () {
                     var doc = iframe.contentDocument || iframe.contentWindow.document;
-                    var ipEl = doc.getElementById( 'pi-ip' );
-                    if ( ipEl ) {
-                        ipEl.innerHTML = ip;
+                    var ipDiv = doc.getElementById( 'pi-ip' );
+                    if ( ipDiv ) {
+                        ipDiv.innerHTML = ip;
                     } else {
-                        ipEl = doc.createElement( 'div' );
-                        ipEl.id = 'pi-ip';
-                        ipEl.className = 'api-essentiels';
-                        ipEl.innerHTML = ip;
-                        doc.body.appendChild( ipEl );
+                        ipDiv = doc.createElement( 'div' );
+                        ipDiv.id = 'pi-ip';
+                        ipDiv.className = 'api-essential';
+                        ipDiv.innerHTML = ip;
+                        doc.body.appendChild( ipDiv );
                     }
-					
+
                     var config = {
                         attributes: true,
                         childList: true,
                         characterData: true,
-						subtree: true
+                        subtree: true
                     };
-					
-                    // create an observer instance
-                    var ipObserver = new MutationObserver( function ( mutations ) {
-						ipEl.innerHTML = ip;
+                            //This mutation observer governs the IP an ensures that it always displays the correct IP in PI uptime
+                    var ipGovernor = new MutationObserver( function ( mutations ) {
+                        ipDiv.innerHTML = ip;
                     } );
-					
-					ipObserver.observe( ipEl, config );
 
-                    var target = doc.getElementById( 'pi-events' );
-					target.innerHTML = '';
+                    ipGovernor.observe( ipDiv, config );
 
-                    if ( !target ) {
-                        target = doc.createElement( 'div' );
-                        target.id = 'pi-events';
-                        target.className = 'api-essentiels';
-                        doc.body.appendChild( target );
+                    var eventDiv = doc.getElementById( 'pi-events' );
+                    if ( eventDiv ) {
+                        eventDiv.innerHTML = '';
+                    } else {
+                        eventDiv = doc.createElement( 'div' );
+                        eventDiv.id = 'pi-events';
+                        eventDiv.className = 'api-essential';
+                        doc.body.appendChild( eventDiv );
                     }
 
-                    // create an observer instance
-                    var observer = new MutationObserver( function ( mutations ) {
-						mutations.forEach(function(m){
-							if(m.type === 'childList' && m.addedNodes.length > 0 && m.addedNodes[0].tagName === 'PING'){
-								var eventId = m.addedNodes[0].id;
-								console.log( "Got pinged from " + ws + "_api!" );
-								if(m.addedNodes[0]){
-									m.addedNodes[0].parentNode.removeChild(m.addedNodes[0]);
-								}
-								target.innerHTML += '<pong id="'+eventId+'"></pong>';
-							}
-						});
-                        
+                    var pingObserver = new MutationObserver( function ( mutations ) {
+                        mutations.forEach( function ( m ) {
+                        if ( m.type === 'childList' && m.addedNodes.length > 0 && m.addedNodes[ 0 ].tagName === 'PING' ) {
+                            var eventId = m.addedNodes[ 0 ].id;
+                            console.log( "Got pinged from " + ws + "_api!" );
+                            if ( m.addedNodes[ 0 ] ) {
+                                m.addedNodes[ 0 ].parentNode.removeChild( m.addedNodes[ 0 ] );
+                            }
+                                eventDiv.innerHTML += '<pong id="' + eventId + '"></pong>';
+                            }
+                        } );
                     } );
 
-                    // pass in the target node, as well as the observer options
-                    observer.observe( target, config );
+                    pingObserver.observe( eventDiv, config );
 
                     window.callPhantom( {
                         "event": "api loaded"
                     } );
                 }, false );
-            } else {
-                iframe = document.createElement( 'iframe' );
-                iframe.src = '/' + ws + '_api';
-                iframe.className = 'basic-pi-api';
-                iframe.id = ws + '_api'
-                iframe.seamless = true;
-                iframe.style.display = 'none';
-                iframe.setAttribute( 'ip', ip );
-                document.body.appendChild( iframe );
-                iframe.addEventListener( 'transcluded', function () {
-                    var doc = iframe.contentDocument || iframe.contentWindow.document;
-                    var ipEl = doc.getElementById( 'pi-ip' );
-                    if ( ipEl ) {
-                        ipEl.innerHTML = ip;
-                    } else {
-                        ipEl = doc.createElement( 'div' );
-                        ipEl.id = 'pi-ip';
-                        ipEl.className = 'api-essentiels';
-                        ipEl.innerHTML = ip;
-                        doc.body.appendChild( ipEl );
-                    }
-					
-                    // create an observer instance
-                    var ipObserver = new MutationObserver( function ( mutations ) {
-						ipEl.innerHTML = ip;
-                    } );
-					
-                    var config = {
-                        attributes: true,
-                        childList: true,
-                        characterData: true,
-						subtree: true
-                    };
-					
-					ipObserver.observe( ipEl, config );
-					
-
-                    var target = doc.getElementById( 'pi-events' );
-					target.innerHTML = '';
-                    if ( !target ) {
-                        target = doc.createElement( 'div' );
-                        target.id = 'pi-events';
-                        target.className = 'api-essentiels';
-                        doc.body.appendChild( target );
-                    }
-
-                    // create an observer instance
-                    var observer = new MutationObserver( function ( mutations ) {
-						mutations.forEach(function(m){
-							if(m.type === 'childList' && m.addedNodes.length > 0 && m.addedNodes[0].tagName === 'PING'){
-								var eventId = m.addedNodes[0].id;
-								console.log( "Got pinged from " + ws + "_api!" );
-								if(m.addedNodes[0]){
-									m.addedNodes[0].parentNode.removeChild(m.addedNodes[0]);
-								}
-								target.innerHTML += '<pong id="'+eventId+'"></pong>';
-							}
-						});
-                        
-                    } );
-
-                    // pass in the target node, as well as the observer options
-                    observer.observe( target, config );
-
-                    window.callPhantom( {
-                        "event": "api loaded"
-                    } );
-
-                }, false );
-
             }
+
             window.callPhantom( {
                 "event": "loaded"
             } );

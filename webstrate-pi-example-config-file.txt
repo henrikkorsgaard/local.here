@@ -10,3 +10,4 @@ webstrate_password=<password>
 webstrate=<name of the webstrate that is linked to the Raspberry PI>
 ssid=<your WPA protected network ssid>
 wifi_password=<password for the network above>
+desciption=<a short desciption of the PI - e.g. office, living room, painting X>

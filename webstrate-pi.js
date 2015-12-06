@@ -23,7 +23,7 @@
             process.exit( 1 );
         }
         if ( config ) {
-            updatePIInfo();
+            //updatePIInfo();
 
             phantomConfig = {};
             phantomConfig.webstrate_server = config.webstrate_server;
@@ -43,9 +43,9 @@
             scannerConfig.broadcast = config.broadcast;
             scannerConfig.ssid = config.ssid;
 
-            initiateProximityScanner();
+            //initiateProximityScanner();
             initiatiePhantomJS();
-            initiateServer();
+            //initiateServer();
         }
     } );
 
