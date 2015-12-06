@@ -28,17 +28,16 @@ page.onInitialized = function () {
             console.log( "Phantom loaded the webstrate api for /" + config.webstrate + " on /" + config.webstrate + "_api" );
         }
     };
-
     page.evaluate( function ( ws, ip ) {
         document.addEventListener( 'loaded', function () {
-
             function addConsole() {
                 var log = document.getElementById( ws + '_console' );
                 if ( log ) {
                     log.innerHTML = '';
                 } else {
-                    document.log = document.createElement( 'div' );
+                    log = document.createElement( 'div' );
                     log.id = ws + '_console';
+					document.body.appendChild(log);
                 }
             }
 
@@ -113,6 +112,9 @@ page.onInitialized = function () {
                     } );
                 }, false );
             }
+			
+			addConsole();
+			addIframe();
 
             window.callPhantom( {
                 "event": "loaded"
