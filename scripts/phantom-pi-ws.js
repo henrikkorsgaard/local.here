@@ -49,7 +49,7 @@ page.onInitialized = function () {
                 } else {
                     iframe = document.createElement( 'iframe' );
                     iframe.src = '/' + ws + '_api';
-                    iframe.className = 'pi-api-connector';
+                    iframe.className = 'pi-api-bridge';
                     iframe.id = ws + '_api';
                     iframe.seamless = true;
                     iframe.setAttribute( 'ip', ip );

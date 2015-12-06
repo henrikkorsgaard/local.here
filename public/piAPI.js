@@ -1,9 +1,9 @@
-/*global console, process, require, __filename, module*/
-( function () {
-    'use strict';
-    console.log('API script loaded');
-    function piAPI( api_connector ) {
-        let iframe = api_connector;
+'use strict';
+let piAPI = (function(){
+
+  	function piAPI(api_bridge){
+
+      	let iframe = api_bridge;
         let idoc = iframe.contentDocument || iframe.contentWindow.document;
         let ip = idoc.getElementById( 'pi-ip' );
         let eventQueue = idoc.getElementById( 'pi-events' );
@@ -89,6 +89,8 @@
             pingPIViaWebsocket,
             pingPIViaWebstrate
         } );
-    }
-    return window.piAPI = piAPI;
-}() );
+  	}
+
+    return piAPI;
+
+}());
