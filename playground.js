@@ -1,13 +1,32 @@
 'use strict';
 
-let device = require('./lib/device.js');
+let device = require( './lib/models/device.js' );
 
-device,getDevice("192.168.1.123", function(d){
-	console.log(d);
-});
+let mongo = require( 'mongoose' );
+mongo.connect( 'mongodb://localhost/webstrate-pi' );
 
+let d = {
+    mac: "54:26:96:de:69:73",
+    signal: 10,
+    mac_resolve: "applede:69:73",
+    user_agent: "computer",
+    ip: "192.168.1.123",
+    name: "test device",
+}
 
+function something() {
+    //castError if number is undefined -> where to handle that?
+    device.getAllDeviceHistory(
+        function ( de ) {
+            console.log( de );
+        } );
 
+    setInterval( function () {
+        something();
+    }, 2000 );
+}
+
+something();
 
 
 
