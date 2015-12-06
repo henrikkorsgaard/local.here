@@ -31,6 +31,7 @@
             serverConfig[ 'ip' ] = config[ 'ip' ];
             serverConfig[ 'port' ] = 1337; //port should be an option on the config.
             serverConfig[ 'webstrate_server' ] = config[ 'webstrate_server' ];
+			serverConfig[ 'ssid' ] = config[ 'ssid' ];
 
             scannerConfig = {};
 			scannerConfig['station_mac'] = config['station_mac'];
