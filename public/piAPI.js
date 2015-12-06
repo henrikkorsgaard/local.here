@@ -2,7 +2,7 @@
 ( function () {
     'use strict';
     console.log('API script loaded');
-    piAPI = function( api_connector ) {
+    function piAPI( api_connector ) {
         let iframe = api_connector;
         let idoc = iframe.contentDocument || iframe.contentWindow.document;
         let ip = idoc.getElementById( 'pi-ip' );
