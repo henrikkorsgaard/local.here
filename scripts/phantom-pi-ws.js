@@ -37,7 +37,7 @@ page.onInitialized = function () {
                 } else {
                     log = document.createElement( 'div' );
                     log.id = ws + '_console';
-					document.body.appendChild(log);
+                    document.body.appendChild( log );
                 }
             }
 
@@ -75,7 +75,7 @@ page.onInitialized = function () {
                         characterData: true,
                         subtree: true
                     };
-                            //This mutation observer governs the IP an ensures that it always displays the correct IP in PI uptime
+                    //This mutation observer governs the IP an ensures that it always displays the correct IP in PI uptime
                     var ipGovernor = new MutationObserver( function ( mutations ) {
                         ipDiv.innerHTML = ip;
                     } );
@@ -94,12 +94,12 @@ page.onInitialized = function () {
 
                     var pingObserver = new MutationObserver( function ( mutations ) {
                         mutations.forEach( function ( m ) {
-                        if ( m.type === 'childList' && m.addedNodes.length > 0 && m.addedNodes[ 0 ].tagName === 'PING' ) {
-                            var eventId = m.addedNodes[ 0 ].id;
-                            console.log( "Got pinged from " + ws + "_api!" );
-                            if ( m.addedNodes[ 0 ] ) {
-                                m.addedNodes[ 0 ].parentNode.removeChild( m.addedNodes[ 0 ] );
-                            }
+                            if ( m.type === 'childList' && m.addedNodes.length > 0 && m.addedNodes[ 0 ].tagName === 'PING' ) {
+                                var eventId = m.addedNodes[ 0 ].id;
+                                console.log( "Got pinged from " + ws + "_api!" );
+                                if ( m.addedNodes[ 0 ] ) {
+                                    m.addedNodes[ 0 ].parentNode.removeChild( m.addedNodes[ 0 ] );
+                                }
                                 eventDiv.innerHTML += '<pong id="' + eventId + '"></pong>';
                             }
                         } );
@@ -112,9 +112,9 @@ page.onInitialized = function () {
                     } );
                 }, false );
             }
-			
-			addConsole();
-			addIframe();
+
+            addConsole();
+            addIframe();
 
             window.callPhantom( {
                 "event": "loaded"
