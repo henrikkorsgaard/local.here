@@ -1,7 +1,7 @@
 /*global console, process, require, __filename, module*/
 ( function () {
     'use strict';
-
+    console.log('API script loaded');
     function piAPI( api_connector ) {
         let iframe = api_connector;
         let idoc = iframe.contentDocument || iframe.contentWindow.document;
