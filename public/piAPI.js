@@ -1,5 +1,5 @@
 /*global console, process, require, __filename, module*/
-( function (piAPI) {
+( function () {
     'use strict';
     console.log('API script loaded');
     piAPI = function( api_connector ) {
@@ -90,5 +90,5 @@
             pingPIViaWebstrate
         } );
     }
-    console.log(piAPI);
-}(window.piAPI) );
+    return window.piAPI = piAPI;
+}() );
