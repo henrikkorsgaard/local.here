@@ -93,7 +93,7 @@ page.onInitialized = function () {
 };
 
 page.onConsoleMessage = function(msg) {
-	var consoleMsg = 'CONSOLE: ' + msg;
+	var consoleMsg = 'CONSOLE: ' + JSON.stringify(msg);
 	console.log(consoleMsg);
 	page.evaluate(function(msg, ws){
 		var log = document.getElementById(ws+'_console');
