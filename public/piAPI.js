@@ -1,6 +1,6 @@
 'use strict';
 let piAPI = (function(){
-
+    console.log("beginning");
   	function piAPI(api_bridge){
 
       	let iframe = api_bridge;
@@ -90,7 +90,7 @@ let piAPI = (function(){
             pingPIViaWebstrate
         } );
   	}
-
+    console.log("end");
     return piAPI;
 
 }());
