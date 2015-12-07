@@ -30,10 +30,10 @@ Each PI should have one PI webstrate and one api-bridge webstrate, and clients t
 ### What the PI does
 The current services running on the PI are as follows
 
-## Proximity scanner:
+#### Proximity scanner:
 A tshark based WLAN network scanning tool that inserts the list of current active devices on the same network as the PI into a mongodb database. This can be used for validating devices prior to doing anything in webstrates, granting token based access on presence in the proximity of the PI, and give priviliged access to the PI (see active devices, signal strengt, invoke shell commands etc.) to people within procimity.
 
-## API server:
+#### API server:
 The API server handles direct API requests and indirect requests via the PI webstrates.
 
 Client can communicate with the PI in three distinct ways:
@@ -41,7 +41,7 @@ Client can communicate with the PI in three distinct ways:
 2. Indirectly in clear text by pushing events to the `<div id="pi-events></div>` queue in the api-bridge webstrate. Very few API commands are available in this 'global' clear text format.
 3. Indirectly in by pushing events to the `<div id="pi-events></div>` queue in the api-bridge webstrate, WITH a AES encrypted request and a signature. The message and answer is encrypted with AES using the public key obtained via method 1 as passphrase and a unique user signature. This token based communication is restricted with a 4 hour session.
 
-## PhantomJS:
+#### PhantomJS:
 The PhantomJS has two roles. It loads the PI webstrate and the PI_api webstrates and sets/governs the needed DOM elements, `<div id="pi-ip"></div>` and `<div id="pi-events"></div>` in the api-bridge. PhantomJS uses MutationObservers to observe for two specific events: 1. If the innerHTML of the pi-ip element is changed, PhantomJS will revert this to the correct IP address, 2. It monitors the pi-events event queue for PING events and responds with a PONG. This is so that clients can check if the PI is awake and responding.
 
 # License
