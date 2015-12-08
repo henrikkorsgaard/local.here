@@ -1,12 +1,12 @@
 'use strict';
-let piAPI = (function(){
-    console.log("beginning");
-  	function piAPI(api_bridge){
+var piAPIClient= (function(){
 
-      	let iframe = api_bridge;
-        let idoc = iframe.contentDocument || iframe.contentWindow.document;
-        let ip = idoc.getElementById( 'pi-ip' );
-        let eventQueue = idoc.getElementById( 'pi-events' );
+  	function piAPI(iframe){
+        var idoc = iframe.contentDocument || iframe.contentWindow.document;
+      	console.log(idoc);
+        var ip = idoc.getElementById( 'pi-ip' ).innerHTML;
+      	console.log(ip);
+        var eventQueue = idoc.getElementById( 'pi-events' );
 
         function pingPIViaWebsocket( callback ) {
             var callbackSent = false;
@@ -38,7 +38,9 @@ let piAPI = (function(){
                         connection.close();
                     }
                 };
-            } //NEED A WAY TO SPOT IF THERE IS A WEBSTRATE "CONNECTION" I.E. AN ACTIVE QUEQUE
+            } else {
+              	callback("failed");
+            }
         }
 
         function pingPIViaWebstrate( callback ) {
@@ -90,7 +92,7 @@ let piAPI = (function(){
             pingPIViaWebstrate
         } );
   	}
-    console.log("end");
+
     return piAPI;
 
 }());
