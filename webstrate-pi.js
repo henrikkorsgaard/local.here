@@ -76,26 +76,4 @@
         scanner = require( './lib/proximity.js' );
         scanner.start( scannerConfig );
     }
-
-    function initiatiePhantomJS() {
-        phantomjs = spawn( 'phantomjs', [ '--web-security=no', '/scripts/phantom-pi-ws.js', JSON.stringify( phantomConfig ) ] );
-
-        phantomjs.stdout.on( 'data', function ( data ) {
-            let msg = data.toString();
-            console.log( msg );
-        } );
-
-        phantomjs.stderr.on( 'data', function ( data ) {
-            let err = data.toString();
-            logger.log( err, "CRITICAL", __filename );
-        } );
-
-        phantomjs.on( 'error', function ( err ) {
-            logger.log( err, "FATAL", __filename );
-        } );
-
-        phantomjs.on( 'close', function ( code ) {
-            logger.log( "Phantomjs closed with code: "+code, "REPORT", __filename );
-        } );
-    }
 }() );

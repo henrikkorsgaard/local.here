@@ -19,6 +19,6 @@
   "dependencies": {
     "cryptico": "^1.0.2",
     "mongoose": "^4.2.7",
-    "ws": "^0.8.1"
+    "request": "^2.67.0"
   }
 }
