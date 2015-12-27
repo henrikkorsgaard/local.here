@@ -19,7 +19,7 @@ module.exports = ( function () {
         });
         l.save(function(err){
             if(err){
-                GLOBAL.Logger.log("Error saving log to database", "FATAL", __filename);
+                GLOBAL.LOGGER.log("Error saving log to database", "FATAL", __filename);
             } else {
                 callback();
             }
@@ -29,16 +29,27 @@ module.exports = ( function () {
     function remove(callback){
         Log.remove({}, function(err) {
           if(err){
-              GLOBAL.Logger.log("Error removing logs from database", "FATAL", __filename);
+              GLOBAL.LOGGER.log("Error removing logs from database", "FATAL", __filename);
           } else {
               callback();
           }
         });
     }
 
+    function getAll(cb){
+        Log.find({}, function(err, result){
+          if(err){
+              GLOBAL.LOGGER.log("Error getting devices from database", "FATAL", __filename);
+          } else {
+              cb(result);
+          }
+        });
+    }
+
     return Object.freeze({
         insert,
-        remove
+        remove,
+        getAll
     });
 
 }() );

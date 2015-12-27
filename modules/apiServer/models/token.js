@@ -33,27 +33,28 @@ module.exports = ( function () {
             s4() + '-' + s4() + s4() + s4();
     }
 
-    function generate( callback ) {
+    function generate(device, callback ) {
         //NEED TO CHECK IF DEVICE IS ON NETWORK
 
         let rsaKey = cryptico.generateRSAKey( guid(), 1024 ); //sticking with the 1024 for now - if going for full client/server crypto, use 2048 and AES
         let key = cryptico.publicKeyString( rsaKey );
-        let token = cryptico.publicKeyID( key );
+        let tok = cryptico.publicKeyID( key );
         let t = new Token( {
-            token: token,
+            token: tok,
             rsaKey: rsaKey,
             publicKey: key,
+            device:device,
             createdAt: Date.now(),
             expiresAt: Date.now() + 4 * 3600000
         } );
 
         t.save( function ( err ) {
             if ( err ) {
-                GLOBAL.LOGGER.log( 'Database error: ' + err, 'FATAL', __filename );
+                GLOBAL.LOGGER.log( 'Database error when saving token: ' + err, 'FATAL', __filename );
             }
             GLOBAL.LOGGER.log( 'Generated token and inserted it into database.', 'LOG', __filename );
             callback( {
-                token: token,
+                token: tok,
                 publicKey: key
             } );
         } );
@@ -71,8 +72,7 @@ module.exports = ( function () {
           if ( result.length > 0 ) {
               if ( Date.now() > result[ 0 ].expiresAt ) {
                   callback( {
-                      token: token,
-                      state: "expired"
+                      token: "expired"
                   } );
               } else {
                   var time = ( result[ 0 ].expiresAt - Date.now() ) / 1000;
@@ -90,15 +90,14 @@ module.exports = ( function () {
                   }
 
                   callback( {
-                      token: token,
-                      state: "valid",
+                      token: "valid",
+                      publicKey:result[ 0 ].publicKey,
                       timeLeft: h + ":" + m + ":" + s
                   } );
               }
           } else {
               callback( {
-                  token: token,
-                  state: "invalid"
+                  token: "invalid"
               } );
           }
       } );

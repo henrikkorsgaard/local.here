@@ -8,7 +8,7 @@ let server;
 let token;
 let publicKey;
 let invalidToken = "12345678910111213141516171819202";
-let ip = '192.168.1.123';
+let ip = '192.168.1.101';
 let device = {
     mac: "54:26:96:de:69:73",
     signal: 55,
@@ -25,14 +25,14 @@ let log = {
 }
 
 let pi = {
-  mac: "54:26:96:de:69:73",
-  ip: '192.168.1.123',
-  stationMac: "TEST",
-  stationIP: "TEST",
-  SSID: "TEST",
-  os: "TEST",
-  cpu: "TEST",
-  peripherals: [ "TEST" ],
+    mac: "54:26:96:de:69:73",
+    ip: '192.168.1.123',
+    stationMac: "TEST",
+    stationIP: "TEST",
+    SSID: "TEST",
+    os: "TEST",
+    cpu: "TEST",
+    peripherals: [ "TEST" ],
 }
 
 describe( 'Testing internal API functionalities', function () {
@@ -64,6 +64,21 @@ describe( 'Testing internal API functionalities', function () {
                 assert.equal( res.statusCode, 200 );
                 let json = JSON.parse( body );
                 assert.equal( json.status, 'ok' );
+                done();
+            } );
+        } );
+
+        it( 'PUT device again because I need it later', function ( done ) {
+
+            var options = {
+                url: 'http://localhost:3333/devices',
+                body: device,
+                json: true,
+                method: 'put'
+            };
+            request( options, function ( err, res, body ) {
+                assert.equal( res.statusCode, 200 );
+                assert.equal( body.status, 'ok' );
                 done();
             } );
         } );
@@ -100,17 +115,17 @@ describe( 'Testing internal API functionalities', function () {
     describe( 'PI API', function () {
 
         it( 'PUT PI', function ( done ) {
-          var options = {
-              url: 'http://localhost:3333/pi',
-              body: pi,
-              json: true,
-              method: 'put'
-          };
-          request( options, function ( err, res, body ) {
-              assert.equal( res.statusCode, 200 );
-              assert.equal( body.status, 'ok' );
-              done();
-          } );
+            var options = {
+                url: 'http://localhost:3333/pi',
+                body: pi,
+                json: true,
+                method: 'put'
+            };
+            request( options, function ( err, res, body ) {
+                assert.equal( res.statusCode, 200 );
+                assert.equal( body.status, 'ok' );
+                done();
+            } );
         } );
 
     } );
@@ -156,7 +171,6 @@ describe( 'Testing external API functionalities', function () {
                 assert.equal( res.statusCode, 418 );
                 let json = JSON.parse( body );
                 assert.equal( json.status, 'error' );
-                assert.equal( json.token, 'invalid' );
                 done();
             } );
         } );
@@ -165,7 +179,7 @@ describe( 'Testing external API functionalities', function () {
 
     describe( 'Device API', function () {
         it( 'GET Devices', function ( done ) {
-            request.get( 'http://' + ip + ':3333/devices', function ( err, res, body ) {
+            request.get( 'http://' + ip + ':3333/' + token + '/devices', function ( err, res, body ) {
                 assert.equal( res.statusCode, 200 );
                 let json = JSON.parse( body );
                 assert.equal( json.status, 'ok' );
@@ -174,8 +188,18 @@ describe( 'Testing external API functionalities', function () {
             } );
         } );
 
-        it( 'GET Device', function ( done ) {
-            request.get( 'http://' + ip + ':3333/devices/' + device.mac, function ( err, res, body ) {
+        it( 'GET Device MAC', function ( done ) {
+            request.get( 'http://' + ip + ':3333/' + token + '/devices/' + device.mac, function ( err, res, body ) {
+                assert.equal( res.statusCode, 200 );
+                let json = JSON.parse( body );
+                assert.equal( json.status, 'ok' );
+                assert.equal( json.hasOwnProperty( 'device' ), true );
+                done();
+            } );
+        } );
+
+        it( 'GET Device IP', function ( done ) {
+            request.get( 'http://' + ip + ':3333/' + token + '/devices/' + device.ip, function ( err, res, body ) {
                 assert.equal( res.statusCode, 200 );
                 let json = JSON.parse( body );
                 assert.equal( json.status, 'ok' );
@@ -197,7 +221,7 @@ describe( 'Testing external API functionalities', function () {
     } );
     describe( 'Log API', function () {
         it( 'GET Logs', function ( done ) {
-            request.get( 'http://' + ip + ':3333/logs', function ( err, res, body ) {
+            request.get( 'http://' + ip + ':3333/'+ token +'/logs', function ( err, res, body ) {
                 assert.equal( res.statusCode, 200 );
                 let json = JSON.parse( body );
                 assert.equal( json.status, 'ok' );
@@ -251,37 +275,38 @@ describe( 'Testing PI only API functionalities', function () {
                 assert.equal( res.statusCode, 418 );
                 let json = JSON.parse( body );
                 assert.equal( json.status, 'error' );
-                assert.equal( json.token, 'invalid' );
                 done();
             } );
         } );
     } );
 
-    describe( 'Encoded Request API', function () {
+    describe( 'Encrypted Request API', function () {
         it( 'GET devices', function ( done ) {
             let encryptedRequest = encrypt( JSON.stringify( {
-                api: devices
+                api: 'devices'
             } ), publicKey );
             request.get( 'http://' + ip + ':3333/' + token + '/' + encryptedRequest, function ( err, res, body ) {
                 assert.equal( res.statusCode, 200 );
-                let decryptedBody = decrypt( body, publicKey );
-                let json = JSON.parse( decryptedBody );
+                let json = JSON.parse( body );
                 assert.equal( json.status, 'ok' );
-                assert.equal( json.hasOwnProperty( 'pi' ), true );
+                let decryptedBody = decrypt( json.encryptedResponse, publicKey );
+                let decryptedJson = JSON.parse( decryptedBody );
+                assert.equal( decryptedJson.hasOwnProperty('devices'), true );
                 done();
             } );
         } );
 
         it( 'GET PI', function ( done ) {
             let encryptedRequest = encrypt( JSON.stringify( {
-                api: pi
+                api: 'pi'
             } ), publicKey );
             request.get( 'http://' + ip + ':3333/' + token + '/' + encryptedRequest, function ( err, res, body ) {
                 assert.equal( res.statusCode, 200 );
-                let decryptedBody = decrypt( body, publicKey );
-                let json = JSON.parse( decryptedBody );
+                let json = JSON.parse( body );
                 assert.equal( json.status, 'ok' );
-                assert.equal( json.hasOwnProperty( 'pi' ), true );
+                let decryptedBody = decrypt( json.encryptedResponse, publicKey );
+                let decryptedJson = JSON.parse( decryptedBody );
+                assert.equal( decryptedJson.hasOwnProperty('pi'), true );
                 done();
             } );
         } );
