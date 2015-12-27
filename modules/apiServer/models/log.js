@@ -12,6 +12,8 @@ module.exports = ( function () {
     let Log = mongoose.model('Log', logSchema);
 
     function insert(log, callback){
+        log = JSON.parse(log);
+
         let l = new Log({
           type:log.type,
           msg: log.msg,
@@ -37,7 +39,7 @@ module.exports = ( function () {
     }
 
     function getAll(cb){
-        Log.find({}, function(err, result){
+        Log.find({}, '-_id -__v', function(err, result){
           if(err){
               GLOBAL.LOGGER.log("Error getting devices from database", "FATAL", __filename);
           } else {

@@ -92,7 +92,7 @@ module.exports = ( function () {
                   callback( {
                       token: "valid",
                       publicKey:result[ 0 ].publicKey,
-                      timeLeft: h + ":" + m + ":" + s
+                      timeleft: h + ":" + m + ":" + s
                   } );
               }
           } else {

@@ -54,13 +54,14 @@ describe( 'Testing internal API functionalities', function () {
             };
             request( options, function ( err, res, body ) {
                 assert.equal( res.statusCode, 200 );
+                console.log(body);
                 assert.equal( body.status, 'ok' );
                 done();
             } );
         } );
 
         it( 'DELETE device', function ( done ) {
-            request.del( 'http://localhost:3333/devices/' + device.mac, function ( err, res, body ) {
+            request.del( 'http://localhost:3333/devices/'+device.mac, function ( err, res, body ) {
                 assert.equal( res.statusCode, 200 );
                 let json = JSON.parse( body );
                 assert.equal( json.status, 'ok' );
@@ -150,6 +151,7 @@ describe( 'Testing external API functionalities', function () {
                 let json = JSON.parse( body );
                 assert.equal( json.status, 'ok' );
                 assert.equal( json.token.length, 32 );
+                assert.equal( json.hasOwnProperty('publicKey'), true );
                 token = json.token;
                 publicKey = json.publicKey;
                 done();
@@ -162,6 +164,7 @@ describe( 'Testing external API functionalities', function () {
                 let json = JSON.parse( body );
                 assert.equal( json.status, 'ok' );
                 assert.equal( json.token, 'valid' );
+                assert.equal( json.hasOwnProperty('timeleft'), true );
                 done();
             } );
         } );
@@ -179,7 +182,7 @@ describe( 'Testing external API functionalities', function () {
 
     describe( 'Device API', function () {
         it( 'GET Devices', function ( done ) {
-            request.get( 'http://' + ip + ':3333/' + token + '/devices', function ( err, res, body ) {
+            request.get( 'http://' + ip + ':3333/devices', function ( err, res, body ) {
                 assert.equal( res.statusCode, 200 );
                 let json = JSON.parse( body );
                 assert.equal( json.status, 'ok' );
@@ -189,7 +192,7 @@ describe( 'Testing external API functionalities', function () {
         } );
 
         it( 'GET Device MAC', function ( done ) {
-            request.get( 'http://' + ip + ':3333/' + token + '/devices/' + device.mac, function ( err, res, body ) {
+            request.get( 'http://' + ip + ':3333/devices/' + device.mac, function ( err, res, body ) {
                 assert.equal( res.statusCode, 200 );
                 let json = JSON.parse( body );
                 assert.equal( json.status, 'ok' );
@@ -199,7 +202,7 @@ describe( 'Testing external API functionalities', function () {
         } );
 
         it( 'GET Device IP', function ( done ) {
-            request.get( 'http://' + ip + ':3333/' + token + '/devices/' + device.ip, function ( err, res, body ) {
+            request.get( 'http://' + ip + ':3333/devices/' + device.ip, function ( err, res, body ) {
                 assert.equal( res.statusCode, 200 );
                 let json = JSON.parse( body );
                 assert.equal( json.status, 'ok' );
@@ -213,7 +216,7 @@ describe( 'Testing external API functionalities', function () {
                 assert.equal( res.statusCode, 200 );
                 let json = JSON.parse( body );
                 assert.equal( json.status, 'ok' );
-                assert.equal( json.hasOwnProperty( 'devices' ), true );
+                assert.equal( json.hasOwnProperty( 'devicesHistory' ), true );
                 done();
             } );
         } );
@@ -221,7 +224,7 @@ describe( 'Testing external API functionalities', function () {
     } );
     describe( 'Log API', function () {
         it( 'GET Logs', function ( done ) {
-            request.get( 'http://' + ip + ':3333/'+ token +'/logs', function ( err, res, body ) {
+            request.get( 'http://' + ip + ':3333/logs', function ( err, res, body ) {
                 assert.equal( res.statusCode, 200 );
                 let json = JSON.parse( body );
                 assert.equal( json.status, 'ok' );

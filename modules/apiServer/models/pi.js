@@ -39,7 +39,7 @@ module.exports = ( function () {
     }
 
     function getPI( cb ) {
-        PI.findOne( {}, function ( err, pi ) {
+        PI.findOne( {},'-_id', function ( err, pi ) {
             if ( err ) {
                 GLOBAL.LOGGER.log( "Error upsert PI to database", "FATAL", __filename );
             } else {
