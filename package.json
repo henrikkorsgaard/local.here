@@ -4,8 +4,7 @@
   "description": "",
   "main": "webstrate-pi.js",
   "scripts": {
-    "test": "mocha /modules/apiServer/apiServer.test.js",
-    "postinstall" : "node scripts/install.js"
+    "test": "mocha /modules/apiServer/apiServer.test.js"
   },
   "repository": {
     "type": "git",

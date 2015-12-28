@@ -1,10 +1,10 @@
 #!/bin/bash
 
 #default configuration file
-configFile='../webstrate-pi.conf'
+configFile='../webstrate-pi.config'
 
 #checking for a custom configuration file provided by the user on boot
-if [ -r /boot/webstrate-pi.conf ]; then
+if [ -r /boot/webstrate-pi.config ]; then
 	echo "reading configuraton from /boot/webstrate-pi.config"
 	configFile='/boot/webstrate-pi.config'
 fi
