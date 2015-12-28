@@ -34,10 +34,10 @@ fi
 
 #Do the stuff the writes to a local config file
 ip="$(ifconfig wlan0 | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*')"
-broadcast="$(ifconfig wlan0 | grep -Eo ' (Bcast:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*')"
+broadcastIP="$(ifconfig wlan0 | grep -Eo ' (Bcast:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*')"
 mac="$(ifconfig wlan0 | grep -o -E '([[:xdigit:]]{1,2}:){5}[[:xdigit:]]{1,2}')"
-station_ip="$(arp -a| grep $ssid | grep -Eo -m 1 '([0-9]*\.){3}[0-9]*')"
-station_mac="$(iw dev wlan0 link | grep -o -E '([[:xdigit:]]{1,2}:){5}[[:xdigit:]]{1,2}')"
+stationIP="$(arp -a| grep $ssid | grep -Eo -m 1 '([0-9]*\.){3}[0-9]*')"
+stationMAC="$(iw dev wlan0 link | grep -o -E '([[:xdigit:]]{1,2}:){5}[[:xdigit:]]{1,2}')"
 
 os="$(cat /proc/version)"
 cpu="$(cat /proc/cpuinfo | grep model | grep -o ":.*" | cut -f2- -d':')"
@@ -48,7 +48,7 @@ if [ -z "$ip" ]
 then
 	echo "ERROR: Unable to verify device ip. This is essentail to running the service. Are you sure that wlan0 is set up and has an ip?"
 	exit
-elif [ -z "$broadcast" ]
+elif [ -z "$broadcastIP" ]
 then
 	echo "ERROR: Unable to obtain the broadcast address of the network. This is essentail to running the service. Are you sure that wlan0 is set up and able to connect to station: $ssid?"
 	exit
@@ -56,16 +56,16 @@ elif [ -z "$mac" ]
 then
 	echo "ERROR: Unable to obtain device mac for wlan0. This is essentail to running the service. Are you sure there is a wirelss device connected to the PI?"
 	exit
-elif [ -z "$station_ip" ]
+elif [ -z "$stationIP" ]
 then
 	echo "ERROR: Unable to obtain station ip address. This is essentail to running the service. Are you sure that wlan0 is set up and able to connect to station: $ssid?"
 	exit
-elif [ -z "$station_mac" ]
+elif [ -z "$stationMAC" ]
 then
 	echo "ERROR: Unable to obtain station mac address. This is essentail to running the service. Are you sure that wlan0 is set up and able to connect to station: $ssid?"
 	exit
 else
 	echo "Generating the local settings and writing to file: webstrate-pi-local.settings"
-	echo "{\"ATTENTION\":\"THIS SETTINGS FILE IS AUTO-GENERATE BY THE STARTUP SCRIPT AND SHOULD NOT BE EDITED\", \"webstrate_server\": \"$webstrate_server\", \"webstrate_login\": \"$webstrate_login\",\"webstrate_password\": \"$webstrate_password\", \"webstrate\": \"$webstrate\", \"ssid\": \"$ssid\", \"ip\": \"$ip\", \"mac\": \"$mac\", \"broadcast\": \"$broadcast\", \"station_ip\": \"$station_ip\", \"station_mac\": \"$station_mac\", \"os\":\"$os\", \"peripherals\":$usb, \"cpu\":\"$cpu\"}" > ../webstrate-pi-local-configuration.conf
+	echo "{\"ATTENTION\":\"THIS SETTINGS FILE IS AUTO-GENERATE BY THE STARTUP SCRIPT AND SHOULD NOT BE EDITED\", \"server\": \"$server\", \"login\": \"$login\",\"password\": \"$password\", \"webstrate\": \"$webstrate\", \"ssid\": \"$ssid\", \"ip\": \"$ip\", \"port\": \"$port\", \"mac\": \"$mac\", \"broadcastIP\": \"$broadcastIP\", \"stationIP\": \"$stationIP\", \"stationMAC\": \"$stationMAC\", \"os\":\"$os\", \"peripherals\":$usb, \"cpu\":\"$cpu\"}" > ../webstrate-pi-local-configuration.conf
 
 fi

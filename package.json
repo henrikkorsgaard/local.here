@@ -2,9 +2,10 @@
   "name": "ws-rpi-discover",
   "version": "1.0.0",
   "description": "",
-  "main": "discover.js",
+  "main": "webstrate-pi.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha /modules/apiServer/apiServer.test.js",
+    "postinstall" : "node scripts/install.js"
   },
   "repository": {
     "type": "git",

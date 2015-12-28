@@ -1,13 +1,11 @@
 /*global console, process, require*/
 ( function () {
     'use strict';
-    let mongo = require( 'mongoose' );
-    mongo.connect( 'mongodb://localhost/webstrate-pi' );
+
+    let
 
     let fs = require( 'fs' );
     let spawn = require( 'child_process' ).spawn;
-    let pi = require( './lib/models/pi.js' );
-    let logger = require( './lib/logger.js' );
 
     let config, phantomConfig, serverConfig, scannerConfig;
     let server, scanner, phantomjs;
@@ -50,13 +48,6 @@
     } );
 
 
-    function initiateServer() {
-        server = require( './lib/server.js' );
-
-        server.listen( serverConfig );
-
-    }
-
     function updatePIInfo() {
         let piObj = {
             mac: config.mac,
@@ -72,8 +63,4 @@
         pi.upsertPI( piObj );
     }
 
-    function initiateProximityScanner() {
-        scanner = require( './lib/proximity.js' );
-        scanner.start( scannerConfig );
-    }
 }() );

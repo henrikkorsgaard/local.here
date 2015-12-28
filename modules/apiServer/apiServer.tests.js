@@ -54,7 +54,6 @@ describe( 'Testing internal API functionalities', function () {
             };
             request( options, function ( err, res, body ) {
                 assert.equal( res.statusCode, 200 );
-                console.log(body);
                 assert.equal( body.status, 'ok' );
                 done();
             } );
