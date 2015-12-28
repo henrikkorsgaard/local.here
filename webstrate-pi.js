@@ -10,7 +10,7 @@
     let config, phantomConfig, serverConfig, scannerConfig;
     let server, scanner, phantomjs;
 
-    fs.readFile( 'webstrate-pi-local-configuration.conf', 'utf8', function ( err, data ) {
+    fs.readFile( 'webstrate-pi-generated.config', 'utf8', function ( err, data ) {
         try {
             if ( err ) {
                 throw err;

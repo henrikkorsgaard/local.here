@@ -3,13 +3,12 @@ try {
     // Query the entry
     stats = fs.statSync('/boot');
 
-    // Is it a directory?
     if (stats.isDirectory()) {
-        console.log("yes");
+        fs.createReadStream('webstrate-pi-example-config-file.txt').pipe(fs.createWriteStream('/boot/webstrate-pi.config'));
     } else {
-        console.log("no");
+        fs.createReadStream('webstrate-pi-example-config-file.txt').pipe(fs.createWriteStream('webstrate-pi.config'));
     }
 }
 catch (e) {
-    console.log(e);
+    fs.createReadStream('webstrate-pi-example-config-file.txt').pipe(fs.createWriteStream('webstrate-pi.config'));
 }

@@ -1,12 +1,12 @@
 #!/bin/bash
 
 #default configuration file
-configFile='../webstrate-pi-example-config-file.conf'
+configFile='../webstrate-pi.conf'
 
 #checking for a custom configuration file provided by the user on boot
 if [ -r /boot/webstrate-pi.conf ]; then
-	echo "reading configuraton from /boot/webstrate-pi.conf"
-	configFile='/boot/webstrate-pi.conf'
+	echo "reading configuraton from /boot/webstrate-pi.config"
+	configFile='/boot/webstrate-pi.config'
 fi
 
 source $configFile
@@ -66,6 +66,5 @@ then
 	exit
 else
 	echo "Generating the local settings and writing to file: webstrate-pi-local.settings"
-	echo "{\"ATTENTION\":\"THIS SETTINGS FILE IS AUTO-GENERATE BY THE STARTUP SCRIPT AND SHOULD NOT BE EDITED\", \"server\": \"$server\", \"login\": \"$login\",\"password\": \"$password\", \"webstrate\": \"$webstrate\", \"ssid\": \"$ssid\", \"ip\": \"$ip\", \"port\": \"$port\", \"mac\": \"$mac\", \"broadcastIP\": \"$broadcastIP\", \"stationIP\": \"$stationIP\", \"stationMAC\": \"$stationMAC\", \"os\":\"$os\", \"peripherals\":$usb, \"cpu\":\"$cpu\"}" > ../webstrate-pi-local-configuration.conf
-
+	echo "{\"ATTENTION\":\"THIS SETTINGS FILE IS AUTO-GENERATE BY THE STARTUP SCRIPT AND SHOULD NOT BE EDITED\", \"server\": \"$server\", \"login\": \"$login\",\"password\": \"$password\", \"webstrate\": \"$webstrate\", \"ssid\": \"$ssid\", \"ip\": \"$ip\", \"port\": \"$port\", \"mac\": \"$mac\", \"broadcastIP\": \"$broadcastIP\", \"stationIP\": \"$stationIP\", \"stationMAC\": \"$stationMAC\", \"os\":\"$os\", \"peripherals\":$usb, \"cpu\":\"$cpu\"}" > ../webstrate-pi-generated.config
 fi
