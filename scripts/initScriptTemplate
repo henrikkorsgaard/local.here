@@ -1,0 +1,18 @@
+case "$1" in
+    start)
+        echo "Starting webstrate-pi service"
+		echo "starting webstrate-pi service" > /var/log/webstrate-pi/webstrate-pi.log
+		${path}/scripts/start.sh ${path} > /var/log/webstrate-pi/webstrate-pi.log 2>&1
+        ;;
+    stop)
+        echo "Stopping webstrate-pi service"
+		echo "Stopping webstrate-pi service" > /var/log/webstrate-pi/webstrate-pi.log
+        killall webstrate-pi
+        ;;
+    *)
+        echo "Usage: /etc/init.d/webstrate-pi start|stop"
+        exit 1
+        ;;
+esac
+
+exit 0

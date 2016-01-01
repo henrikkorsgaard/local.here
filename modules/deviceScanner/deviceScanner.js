@@ -4,12 +4,14 @@ let exec = require( 'child_process' ).exec;
 let spawn = require( 'child_process' ).spawn;
 let request = require( 'request' );
 
-module.exports( function () {
+module.exports = ( function () {
 
     let scannerConfig;
     let scanner;
     let devices = {};
     let filter;
+	let timer;
+	let dbInterval;
     let macRegExp = new RegExp( /((?:(\d{1,2}|[a-fA-F]{1,2}){2})(?::|-*)){6}/ );
     let ipRegExp = new RegExp( /\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/g );
     var putOptions = {
@@ -28,16 +30,18 @@ module.exports( function () {
             return new DeviceScanner( config );
         }
 
-        if ( config && config.hasOwnProperty( 'stationMac' ) && config.hasOwnProperty( 'broadcastIP' ) && config.hasOwnProperty( 'ssid' ) ) {
+        if ( config && config.hasOwnProperty( 'stationMAC' ) && config.hasOwnProperty( 'broadcastIP' ) && config.hasOwnProperty( 'ssid' ) ) {
             scannerConfig = config;
             start();
         } else {
-            GLOBAL.Logger.log( 'Missing configuration parameters!', 'FATAL', __filename );
+            GLOBAL.LOGGER.log( 'Missing configuration parameters!', 'FATAL', __filename );
         }
     }
 
     function start() {
-        filter = 'wlan.da==' + scannerConfig.stationMac;
+        filter = 'wlan.da==' + scannerConfig.stationMAC;
+		timer = new Date().getTime();
+		dbInterval = 1000;
         scanner = spawn( 'tshark', [ '-i', 'mon0', '-l', '-y', 'IEEE802_11_RADIO', '-Y', filter, '-T', 'fields', '-e', 'wlan.sa', '-e', 'radiotap.dbm_antsignal', '-e', 'wlan.sa_resolved' ] );
 
         scanner.stdout.on( 'data', function ( data ) {
@@ -99,7 +103,7 @@ module.exports( function () {
     }
 
     function updateDevice( device ) {
-        putOptions.body = d;
+        putOptions.body = device;
         request( putOptions, function ( err, res, body ) {
             if ( err || res.statusCode !== 200 ) {
                 GLOBAL.LOGGER.log( "Unable to send device to the server. Err:  " + err, "FATAL", __filename );
@@ -122,15 +126,16 @@ module.exports( function () {
             } else {
                 let lines = stdout.split( '\n' );
                 for ( let i = 1; i < lines.length; i += 1 ) {
-                    if ( lines[ i ].length > 0 && lines[ i ].indexOf( config.ssid ) === -1 ) {
-                        let mac = lines[ i ].match( macRE )[ 0 ];
-                        if ( devices[ mac ] !== undefined ) {
-                            devices[ mac ].ip = lines[ i ].match( ipRE )[ 0 ];
+                    if ( lines[ i ].length > 0 && lines[ i ].indexOf( scannerConfig.ssid ) === -1 ) {
+                        let mac = lines[ i ].match( macRegExp );
+
+                        if (mac && devices[ mac[0] ] !== undefined ) {
+                            devices[ mac[0] ].ip = lines[ i ].match( ipRegExp )[ 0 ];
                             let nameString = lines[ i ].split( ' ' )[ 0 ];
                             if ( nameString.indexOf( '.' ) > -1 ) {
                                 nameString = nameString.substring( 0, nameString.indexOf( '.' ) );
                             }
-                            devices[ mac ].name = nameString;
+                            devices[ mac[0] ].name = nameString;
                         }
                     }
                 }

@@ -5,8 +5,6 @@
 let Logger = require( '../../lib/logger.js' );
 GLOBAL.LOGGER = new Logger();
 
-//Database models
-let mongo = require( 'mongoose' );
 let api = require( './api.js' );
 let http = require( 'http' );
 
@@ -16,8 +14,6 @@ module.exports = ( function () {
     let ip;
     let server;
     let ipRegExp = new RegExp( /\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/g );
-
-    mongo.connect( 'mongodb://localhost/webstrate-pi' );
 
     function ApiServer( config ) {
         if ( !( this instanceof ApiServer ) ) {

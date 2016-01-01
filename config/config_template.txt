@@ -1,0 +1,21 @@
+# Configuration file for webstrate-pi.
+# Config file in /boot will be selected over config file in /webstrate-pi
+
+# Uncomment and save with correct values.
+
+# Webstrate server login configuration
+#server=
+#login=
+#password=
+
+# Webstrate this PI will watch. This will also be the hostname of this Raspberry PI.
+#webstrate=
+
+# Service configuration
+# API server port
+#port=
+
+# WLAN configuration
+#ssid=
+#wifi_password=
+
