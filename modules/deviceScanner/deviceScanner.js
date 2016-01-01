@@ -15,12 +15,7 @@ module.exports = ( function () {
     let macRegExp = new RegExp( /((?:(\d{1,2}|[a-fA-F]{1,2}){2})(?::|-*)){6}/ );
     let ipRegExp = new RegExp( /\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/g );
     var putOptions = {
-        url: 'http://localhost:3333/devices',
-        json: true,
-        method: 'put'
-    };
-    var delOptions = {
-        url: 'http://localhost:3333/devices',
+        url: 'http://localhost:1337/devices',
         json: true,
         method: 'put'
     };
@@ -112,7 +107,7 @@ module.exports = ( function () {
     }
 
     function removeDevice( device ) {
-        request.del( 'http://localhost:3333/devices/' + device.mac, function ( err, res, body ) {
+        request.del( 'http://localhost:1337/devices/' + device.mac, function ( err, res, body ) {
             if ( err || res.statusCode !== 200 ) {
                 GLOBAL.LOGGER.log( "Unable to send device to the server. Err:  " + err, "FATAL", __filename );
             }

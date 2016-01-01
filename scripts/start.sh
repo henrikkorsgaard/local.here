@@ -18,11 +18,23 @@ then
 	exit
 fi
 
-echo $webstrate > /etc/hostname
+if [ -n "$(hostname | grep ^$webstrate$)" ]; then
+	echo "Hostname is already set as $webstrate"
+else
+	echo "Updating hostname to to $webstrate"
+	echo $webstrate > /etc/hostname
+	printf "127.0.0.1\tlocalhost\n" > /etc/hosts
+	printf "::1\t\tlocalhost ip6-localhost ip6-loopback\n" >> /etc/hosts
+	printf "ff02::1\t\tip6-allnodes\n" >> /etc/hosts
+	printf "ff02::2\t\tip6-allrouters\n" >> /etc/hosts
+	printf "127.0.0.1\t$webstrate\n" >> /etc/hosts
+	sudo hostname $webstrate
+	sudo /etc/init.d/networking restart
+	sleep 5
+fi
 
 # Setting up wlan link
-if [ -n "$(iw dev wlan0 link | grep $ssid)" ]
-then
+if [ -n "$(iw dev wlan0 link | grep $ssid)" ]; then
 	echo "Wlan0 is already setup and running on $ssid"
 else
 	echo "Updating network configuration"
@@ -39,6 +51,11 @@ else
 	echo "Setting up monitor device (mon0)"
 	sudo iw wlan0 interface add mon0 type monitor
 	sudo ip link set mon0 up
+fi
+
+if [ -n "$(iw dev wlan0 link | grep HDMI)" ];then
+	echo "Setting up chrome on HDMI kiosk"
+	echo "TODO: SET UP CHROMIUM HDMI KIOSK"
 fi
 
 # Getting device ip

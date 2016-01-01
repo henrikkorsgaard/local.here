@@ -1,6 +1,7 @@
 module.exports = ( function () {
     'use strict';
-    let cryptico = require( 'cryptico' );
+	let crypto = require('crypto');
+	let prime_length = 128;
     let mongoose = require( 'mongoose' );
     let Schema = mongoose.Schema;
     let tokenSchema = new Schema( {
@@ -10,7 +11,6 @@ module.exports = ( function () {
             unique: true
         },
         device: Object,
-        rsaKey: Object,
         publicKey: {
             type: String,
             required: true,
@@ -34,14 +34,15 @@ module.exports = ( function () {
     }
 
     function generate(device, callback ) {
-        //NEED TO CHECK IF DEVICE IS ON NETWORK
+		
+		let diffHell = crypto.createDiffieHellman(prime_length);
 
-        let rsaKey = cryptico.generateRSAKey( guid(), 1024 ); //sticking with the 1024 for now - if going for full client/server crypto, use 2048 and AES
-        let key = cryptico.publicKeyString( rsaKey );
-        let tok = cryptico.publicKeyID( key );
+		diffHell.generateKeys('base64');
+        
+        let key = diffHell.getPublicKey('hex');
+        let tok = diffHell.getPrivateKey('hex');
         let t = new Token( {
             token: tok,
-            rsaKey: rsaKey,
             publicKey: key,
             device:device,
             createdAt: Date.now(),

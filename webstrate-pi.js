@@ -1,8 +1,7 @@
 /*global console, process, require*/
 ( function () {
     'use strict';
-	let mongo = require( 'mongoose' );
-	mongo.connect( 'mongodb://localhost/webstrate-pi' );
+	
 	let ApiServer = require('./modules/apiServer/apiServer.js');
 	let DeviceScanner = require('./modules/deviceScanner/deviceScanner.js');
 	
@@ -27,7 +26,9 @@
 			console.log(config);
 			server = new ApiServer( config );
 			scanner = new DeviceScanner(config);
-			
+			//TODO: Get phantomjs in it as well!
+			//Wait 10000s and then put PI data into db as well
+			//Chromium kiosk -> webstrate!https://www.danpurdy.co.uk/web-development/raspberry-pi-kiosk-screen-tutorial/
         }
     } );
 }() );

@@ -2,11 +2,11 @@ case "$1" in
     start)
         echo "Starting webstrate-pi service"
 		echo "starting webstrate-pi service" > /var/log/webstrate-pi/webstrate-pi.log
-		${path}/scripts/start.sh ${path} > /var/log/webstrate-pi/webstrate-pi.log 2>&1
+		${path}/scripts/start.sh ${path} > /var/log/webstrate-pi/logs.log 2> /var/log/webstrate-pi/errors.log
         ;;
     stop)
         echo "Stopping webstrate-pi service"
-		echo "Stopping webstrate-pi service" > /var/log/webstrate-pi/webstrate-pi.log
+		echo "Stopping webstrate-pi service" > /var/log/webstrate-pi/logs.log
         killall webstrate-pi
         ;;
     *)

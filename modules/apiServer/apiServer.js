@@ -7,14 +7,14 @@ GLOBAL.LOGGER = new Logger();
 
 let api = require( './api.js' );
 let http = require( 'http' );
-
+let mongo = require( 'mongoose' );
 
 module.exports = ( function () {
     let port;
     let ip;
     let server;
     let ipRegExp = new RegExp( /\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/g );
-
+	mongo.connect( 'mongodb://localhost/webstrate-pi' );
     function ApiServer( config ) {
         if ( !( this instanceof ApiServer ) ) {
             return new ApiServer( config );
@@ -49,6 +49,7 @@ module.exports = ( function () {
                 'Content-Type': 'image/x-icon'
             } );
             r.end();
+			return;
         }
 
         let requestIp = q.connection.remoteAddress;
@@ -93,6 +94,7 @@ module.exports = ( function () {
             for ( var obj in api.externalAPI ) {
                 let re = new RegExp( obj );
                 if ( q.url.match( re ) ) {
+					console.log("match")
                     api.externalAPI[ obj ].fn( q, r );
                     match = true;
                     break;
@@ -105,6 +107,7 @@ module.exports = ( function () {
                 } );
             }
         } else {
+			console.log("også")
             api.apiRequestReturn( r, {
                 status: 'error',
                 response: "Unable to identify origin and/or origin IP."
