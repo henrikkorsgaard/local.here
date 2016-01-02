@@ -4,6 +4,7 @@
   "description": "",
   "main": "webstrate-pi.js",
   "scripts": {
+	"preinstall": "sudo scripts/setup.sh",
     "test": "mocha /modules/apiServer/apiServer.test.js"
   },
   "repository": {
@@ -17,7 +18,6 @@
   },
   "homepage": "https://github.com/henrikkorsgaard/ws-rpi-discover#readme",
   "dependencies": {
-    "cryptico": "^1.0.2",
     "mongoose": "^4.3.4",
     "request": "^2.67.0"
   }

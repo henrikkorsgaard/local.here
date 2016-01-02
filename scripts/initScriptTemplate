@@ -6,7 +6,7 @@ case "$1" in
         ;;
     stop)
         echo "Stopping webstrate-pi service"
-		echo "Stopping webstrate-pi service" > /var/log/webstrate-pi/logs.log
+	echo "Stopping webstrate-pi service" > /var/log/webstrate-pi/logs.log
         killall webstrate-pi
         ;;
     *)

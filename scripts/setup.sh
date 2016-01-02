@@ -7,6 +7,8 @@ if [ `whoami` != root ]; then
     exit
 fi
 
+echo "We need to do a bit of work - go make a cup of coffes, it's gonna take a while!"
+
 if [ -r /var/log/webstrate-pi ]; then
 	echo "Log dir already exist. Continuing"
 	rm -f /var/log/webstrate-pi/logs.log
@@ -33,14 +35,10 @@ chmod +x /etc/init.d/webstrate-pi
 sudo update-rc.d webstrate-pi defaults
 
 # INSTALL DEPENDENCIES
-#LIST_OF_DEPENDENCIES="mongodb tshark nmap x11-xserver-utils unclutter" 
-#echo "Installing dependencies"
-#apt-get update
-#apt-get install -y $LIST_OF_DEPENDENCIES
-
-# To install chrome: http://conoroneill.net/running-the-latest-chromium-45-on-debian-jessie-on-your-raspberry-pi-2/
-# Kiosk: https://www.danpurdy.co.uk/web-development/raspberry-pi-kiosk-screen-tutorial/
-
+LIST_OF_DEPENDENCIES="mongodb tshark nmap libkrb5-dev matchbox" 
+echo "Installing dependencies"
+apt-get update
+apt-get install -y $LIST_OF_DEPENDENCIES
 
 if [ -r /boot ]; then
 	if [ ! -f /boot/webstrate-pi.config ]; then
@@ -53,5 +51,10 @@ else
 		cp ${path}/config/config_template.txt ${path}/config/webstrate-pi.config
 	fi
 fi
+
+cp ${path}/bin/phantomjs /bin/
+
+sudo npm install forever -g
+
 
 

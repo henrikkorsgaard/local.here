@@ -10,9 +10,9 @@ module.exports = ( function () {
             unique: true
         },
         ip: String,
-        stationMac: String,
+        stationMAC: String,
         stationIP: String,
-        SSID: String,
+        ssid: String,
         os: String,
         cpu: String,
         peripherals: [ String ],

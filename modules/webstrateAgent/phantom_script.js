@@ -25,36 +25,44 @@ page.onInitialized = function () {
         if ( data.event === 'loaded' ) {
             console.log( "Phantom loaded the " + config.webstrate + " webstrate on " + config.server );
         } else if ( data.event === 'api loaded' ) {
-            console.log( "Phantom loaded the webstrate api for /" + config.webstrate + " on /" + config.webstrate + "_api" );
+            console.log( "Phantom loaded the webstrate api for /" + config.webstrate + " on /" + config.webstrate + "api" );
         }
     };
-    page.evaluate( function ( ws, ip ) {
+    page.evaluate( function ( ws, ip, port ) {
         document.addEventListener( 'loaded', function () {
-            function addIframe() {
-                var iframe = document.getElementById( ws + '_api' );
+            function addIframes() {
+                var apiIframe = document.getElementById( 'api' );
 
-                if ( iframe ) {
-                    iframe.setAttribute( 'ip', ip );
+                if ( apiIframe ) {
+                    apiIframe.setAttribute( 'ip', ip );
                 } else {
-                    iframe = document.createElement( 'iframe' );
-                    iframe.src = '/' + ws + '_api';
-                    iframe.className = 'pi-api-bridge';
-                    iframe.id = ws + '_api';
-                    iframe.seamless = true;
-                    iframe.setAttribute( 'ip', ip );
-                    document.body.appendChild( iframe );
+                    apiIframe = document.createElement( 'iframe' );
+                    apiIframe.src = '/' + ws + '-api';
+                    apiIframe.id = 'api';
+                    apiIframe.setAttribute( 'ip', ip );
+                    document.body.appendChild( apiIframe );
+                }
+				
+				var viewIframe = document.getElementById( 'view' );
+				
+                if ( viewIframe ) {
+                    viewIframe.setAttribute( 'ip', ip );
+                } else {
+                    viewIframe = document.createElement( 'iframe' );
+                    viewIframe.src = '/' + ws + '-view';
+                    viewIframe.id = 'view';
+                    document.body.appendChild( viewIframe );
                 }
 
-                iframe.addEventListener( 'transcluded', function () {
-                    var doc = iframe.contentDocument || iframe.contentWindow.document;
+                apiIframe.addEventListener( 'transcluded', function () {
+                    var doc = apiIframe.contentDocument || apiIframe.contentWindow.document;
                     var ipDiv = doc.getElementById( 'pi-ip' );
                     if ( ipDiv ) {
                         ipDiv.innerHTML = ip;
                     } else {
                         ipDiv = doc.createElement( 'div' );
                         ipDiv.id = 'pi-ip';
-                        ipDiv.className = 'api-essential';
-                        ipDiv.innerHTML = ip;
+                        ipDiv.innerHTML = ip+":"+port;
                         doc.body.appendChild( ipDiv );
                     }
 
@@ -85,7 +93,7 @@ page.onInitialized = function () {
                         mutations.forEach( function ( m ) {
                             if ( m.type === 'childList' && m.addedNodes.length > 0 && m.addedNodes[ 0 ].tagName === 'PING' ) {
                                 var eventId = m.addedNodes[ 0 ].id;
-                                console.log( "Got pinged from " + ws + "_api!" );
+                                console.log( "Got pinged from " + ws + "-api!" );
                                 if ( m.addedNodes[ 0 ] ) {
                                     m.addedNodes[ 0 ].parentNode.removeChild( m.addedNodes[ 0 ] );
                                 }
@@ -101,13 +109,13 @@ page.onInitialized = function () {
                     } );
                 }, false );
             }
-            addIframe();
+            addIframes();
 
             window.callPhantom( {
                 "event": "loaded"
             } );
         }, false );
-    }, config.webstrate, config.ip );
+    }, config.webstrate, config.ip, config.port );
 };
 
 page.onConsoleMessage = function ( msg ) {
