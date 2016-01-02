@@ -46,7 +46,7 @@ page.onInitialized = function () {
 				var viewIframe = document.getElementById( 'view' );
 				
                 if ( viewIframe ) {
-                    viewIframe.setAttribute( 'ip', ip );
+                    
                 } else {
                     viewIframe = document.createElement( 'iframe' );
                     viewIframe.src = '/' + ws + '-view';
