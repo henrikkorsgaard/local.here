@@ -54,7 +54,5 @@ fi
 
 cp ${path}/bin/phantomjs /bin/
 
-sudo npm install forever -g
-
 
 
