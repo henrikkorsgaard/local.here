@@ -47,11 +47,22 @@ module.exports = ( function () {
           }
         });
     }
+	
+	function purge(){
+		GLOBAL.LOGGER.log( "Purging Log DB collection", "LOG", __filename );
+		Log.remove({}, function(err){
+			if(err){
+	        	GLOBAL.LOGGER.log( "Error purging Log DB collection", "FATAL", __filename );
+			}
+		});
+		
+	}
 
     return Object.freeze({
         insert,
         remove,
-        getAll
+        getAll,
+		purge
     });
 
 }() );

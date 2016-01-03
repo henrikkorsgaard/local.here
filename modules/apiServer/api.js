@@ -23,6 +23,10 @@ module.exports.internalAPI = {
                         respondOK(r);
                     } );
                 } );
+			} else if(q.method === "DELETE"){
+                Device.cleanup(function () {
+                    respondOK(r);
+                } );
             } else {
                 unsupportedMethod(r, q.method );
             }
@@ -33,7 +37,7 @@ module.exports.internalAPI = {
         fn: function ( q, r ) {
             if ( q.method === "DELETE" ) {
                 let fragments = q.url.split( '/' ).filter( Boolean );
-                Device.remove( fragments[ 2 ], function () {
+                Device.remove( fragments[ 1 ], function () {
                     respondOK(r);
                 } );
             } else {

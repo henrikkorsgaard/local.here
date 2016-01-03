@@ -15,6 +15,7 @@ module.exports = ( function () {
     let server;
     let ipRegExp = new RegExp( /\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/g );
 	mongo.connect( 'mongodb://localhost/webstrate-pi' );
+	
     function ApiServer( config ) {
         if ( !( this instanceof ApiServer ) ) {
             return new ApiServer( config );
@@ -94,7 +95,6 @@ module.exports = ( function () {
             for ( var obj in api.externalAPI ) {
                 let re = new RegExp( obj );
                 if ( q.url.match( re ) ) {
-					console.log("match")
                     api.externalAPI[ obj ].fn( q, r );
                     match = true;
                     break;

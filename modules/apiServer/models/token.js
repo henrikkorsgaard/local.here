@@ -103,10 +103,21 @@ module.exports = ( function () {
           }
       } );
     }
+	
+	function purge(){
+		GLOBAL.LOGGER.log( "Purging Token DB collection", "LOG", __filename );
+		Token.remove({}, function(err){
+			if(err){
+	        	GLOBAL.LOGGER.log( "Error purging token database", "FATAL", __filename );
+			}
+		});
+		
+	}
 
     return Object.freeze( {
         generate,
-        validate
+        validate,
+		purge
     } );
 
 }() );

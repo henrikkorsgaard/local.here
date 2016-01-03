@@ -10,7 +10,9 @@ module.exports = ( function () {
     let scanner;
     let devices = {};
     let filter;
-	let timer;
+	let dbTimer;
+	let nmapTimer;
+	let nmapInterval;
 	let dbInterval;
     let macRegExp = new RegExp( /((?:(\d{1,2}|[a-fA-F]{1,2}){2})(?::|-*)){6}/ );
     let ipRegExp = new RegExp( /\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/g );
@@ -25,7 +27,7 @@ module.exports = ( function () {
             return new DeviceScanner( config );
         }
 
-        if ( config && config.hasOwnProperty( 'stationMAC' ) && config.hasOwnProperty( 'broadcastIP' ) && config.hasOwnProperty( 'ssid' ) ) {
+        if ( config && config.hasOwnProperty( 'stationMAC' ) && config.hasOwnProperty( 'ssid' ) ) {
             scannerConfig = config;
             start();
         } else {
@@ -35,9 +37,13 @@ module.exports = ( function () {
 
     function start() {
         filter = 'wlan.da==' + scannerConfig.stationMAC;
-		timer = new Date().getTime();
+		dbTimer = new Date().getTime();
+		nmapTimer = new Date().getTime();
 		dbInterval = 1000;
-        scanner = spawn( 'tshark', [ '-i', 'mon0', '-l', '-y', 'IEEE802_11_RADIO', '-Y', filter, '-T', 'fields', '-e', 'wlan.sa', '-e', 'radiotap.dbm_antsignal', '-e', 'wlan.sa_resolved' ] );
+		nmapInterval = 30000;
+		nmapNetwork();
+        
+		scanner = spawn( 'tshark', [ '-i', 'mon0', '-l', '-y', 'IEEE802_11_RADIO', '-Y', filter, '-T', 'fields', '-e', 'wlan.sa', '-e', 'radiotap.dbm_antsignal', '-e', 'wlan.sa_resolved' ] );
 
         scanner.stdout.on( 'data', function ( data ) {
             let dataString = data.toString().replace( "\n", "" );
@@ -47,38 +53,33 @@ module.exports = ( function () {
                     devices[ dataArray[ 0 ] ] = {};
                     devices[ dataArray[ 0 ] ].mac = dataArray[ 0 ];
                     devices[ dataArray[ 0 ] ].signal = dataArray[ 1 ];
-                    devices[ dataArray[ 0 ] ].mac_resolved = dataArray[ 2 ];
                 }
                 devices[ dataArray[ 0 ] ].signal = dataArray[ 1 ];
             }
 
-            if ( new Date().getTime() > timer + dbInterval ) {
-                timer = new Date().getTime();
-
+            if ( new Date().getTime() > dbTimer + dbInterval ) {
+                dbTimer = new Date().getTime();
                 for ( let obj in devices ) {
-                    if ( devices[ obj ].ip === undefined ) {
-                        updateIpAndName();
+                   let d = {
+						mac: devices[ obj ].mac,
+						signal: devices[ obj ].signal,
+						ip: devices[ obj ].ip,
+					};
+					if ( devices[ obj ].signal === undefined ) {
+						delete devices[ obj ];
+						//removeDevice( d );
 
-                    } else {
-                        let d = {
-                            mac: devices[ obj ].mac,
-                            signal: devices[ obj ].signal,
-                            mac_resolved: devices[ obj ].mac_resolved,
-                            user_agent: devices[ obj ].user_agent,
-                            ip: devices[ obj ].ip,
-                            name: devices[ obj ].name
-                        };
-                        if ( devices[ obj ].signal === undefined ) {
-                            delete devices[ obj ];
-                            removeDevice( d );
-
-                        } else {
-                            updateDevice( d );
-                            devices[ obj ].signal = undefined;
-                        }
-                    }
-                }
+					} else {
+						updateDevice( d );
+						devices[ obj ].signal = undefined;
+					}
+				}
             }
+			
+            if ( new Date().getTime() > nmapTimer + nmapInterval ) {
+                nmapTimer = new Date().getTime();
+				nmapNetwork();
+			}
         } );
 
         scanner.stderr.on( 'data', function ( data ) {
@@ -114,28 +115,47 @@ module.exports = ( function () {
         } );
     }
 
-    function updateIpAndName() {
-        exec( 'ping -b -c1 ' + scannerConfig.broadcastIP + ' 2>&1 >/dev/null;arp -a', function ( err, stdout, stderr ) {
-            if ( err || stderr ) {
-                logger.log( err || stderr, "CRITICAL", __filename );
-            } else {
-                let lines = stdout.split( '\n' );
-                for ( let i = 1; i < lines.length; i += 1 ) {
-                    if ( lines[ i ].length > 0 && lines[ i ].indexOf( scannerConfig.ssid ) === -1 ) {
-                        let mac = lines[ i ].match( macRegExp );
+    function nmapNetwork() {
+		exec('sudo nmap -sP '+scannerConfig.stationIP+'/24', function(err, stdout, stderr){
+			if(err || stderr){
+				console.error("Unable to obtain configuration information");
+				process.exit(1);
+			}
+			let lines = stdout.split('\n').filter( Boolean );
+			for(var i = 0;i<lines.length;i++){
+				if(lines[i].search(ipRegExp) !== -1){
+					let mac = lines[i+2].match(macRegExp);
+					if(mac && mac[0].match(macRegExp)){
+						let device = {}
+						device.mac = mac[0].toLowerCase();
+					
+						let bits = lines[i].split(' ').filter( Boolean );
+						device.name = bits[4];
+						if(device.name.indexOf('.') !== -1){
+							device.name = device.name.substring(0, device.name.indexOf('.'));
+						}
 
-                        if (mac && devices[ mac[0] ] !== undefined ) {
-                            devices[ mac[0] ].ip = lines[ i ].match( ipRegExp )[ 0 ];
-                            let nameString = lines[ i ].split( ' ' )[ 0 ];
-                            if ( nameString.indexOf( '.' ) > -1 ) {
-                                nameString = nameString.substring( 0, nameString.indexOf( '.' ) );
-                            }
-                            devices[ mac[0] ].name = nameString;
-                        }
-                    }
-                }
-            }
-        } );
+						if(bits[5]){
+							device.ip =  bits[5].replace("(",'').replace(")",'');
+						} else {
+							device.ip = bits[4];
+							delete device.name;
+						}
+						if(lines[i+2].split('(').filter( Boolean )[1]){
+							device.vendor = lines[i+2].split('(').filter( Boolean )[1].replace(')','');
+						}
+						updateDevice(device);
+					}
+				}
+			}
+			
+	        request.del( 'http://localhost:1337/devices', function ( err, res, body ) {
+	            if ( err || res.statusCode !== 200 ) {
+	                GLOBAL.LOGGER.log( "Unable to send device to the server. Err:  " + err, "FATAL", __filename );
+	            }
+	        } );
+
+		});
     }
 
 

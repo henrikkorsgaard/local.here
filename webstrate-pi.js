@@ -66,7 +66,6 @@
 			let mac = stdout.match(macRegExp);
 			try {
 				config.ip = ip[0];
-				config.broadcastIP = ip[1];
 				config.mac = mac[0];
 			} catch (e){
 				console.error("Unable to obtain configuration information");
@@ -146,7 +145,7 @@
 	}
 
 	function finishedExec(){
-		if(config.hasOwnProperty('ip') && config.hasOwnProperty('broadcastIP') && config.hasOwnProperty('mac') && config.hasOwnProperty('stationIP') && config.hasOwnProperty('stationMAC') && config.hasOwnProperty('os') && config.hasOwnProperty('cpu') && config.hasOwnProperty('peripherals') ){
+		if(config.hasOwnProperty('ip') && config.hasOwnProperty('mac') && config.hasOwnProperty('stationIP') && config.hasOwnProperty('stationMAC') && config.hasOwnProperty('os') && config.hasOwnProperty('cpu') && config.hasOwnProperty('peripherals') ){
 			startServices();
 		}
 	}
@@ -158,13 +157,14 @@
 		
 		setTimeout(function(){
 			let pi = {};
+			pi.name = config.webstrate;
 			pi.mac = config.mac;
 			pi.ip = config.ip;
 			pi.stationMAC = config.stationMAC;
 			pi.stationIP = config.stationIP;
 			pi.ssid = config.ssid;
 			pi.os = config.os;
-			pi.cpu = config.cpu ;
+			pi.cpu = config.cpu;
 			pi.peripherals = config.peripherals;
 			
 	        var options = {

@@ -9,21 +9,18 @@ module.exports = ( function () {
             unique: true
         },
         signal: Number,
-        mac_resolved: String,
         user_agent: String,
         ip: String,
+		vendor:String,
         name: String,
-        updatedAt: {
-            type: Date,
-            default: Date.now
-        }
+        updatedAt: Date
     } );
 
     let deviceLogSchema = new Schema( {
         mac: String,
         signals: [ Number ],
-        mac_resolved: String,
         user_agent: String,
+		vendor: String,
         ip: String,
         name: String,
         createdAt: Date,
@@ -33,73 +30,63 @@ module.exports = ( function () {
 
     let Device = mongoose.model( 'Device', deviceSchema );
     let DeviceLog = mongoose.model( 'DeviceLog', deviceLogSchema );
-
-    function logDevice( device ) {
-        DeviceLog.find( {
-            'mac': device.mac
-        } ).exists( 'removedAt', false ).exec( function ( err, result ) {
-            if ( err ) {
+	
+	function cleanup(cb){
+		let expired = (new Date(Date.now()-32000));
+		Device.find({ $and: [{$or: [{updatedAt:{$lt: expired}}]},{ $or: [{name:{$exists: false}}]}]}, function(err, doc){
+			if ( err ) {
                 GLOBAL.LOGGER.log( err, "CRITICAL", __filename );
             }
-            if ( result.length === 0 ) {
+			if(doc){
+				for(var i = 0;i<doc.length;i++){
+					remove(doc[i].mac, function(){});
+				}
+			}
+			cb();
+		});
+	}
 
-                device.signals = [];
-                device.signals.push(device.signal);
-                device.createdAt = Date.now();
-                let deviceLog = new DeviceLog( device );
-                deviceLog.save( function ( err ) {
-                    if ( err ) {
-                        GLOBAL.LOGGER.log( err, "CRITICAL", __filename );
-                    }
-                } );
-            } else if ( result.length === 1 ) {
-                result[ 0 ].signals.push( device.signal );
-                result[ 0 ].save( function ( err ) {
-                    if ( err ) {
-                        GLOBAL.LOGGER.log( err, "CRITICAL", __filename );
-                    }
-                } );
-            } else {
-                GLOBAL.LOGGER.log( "Got an unexpected result from device log database.", "CRITICAL", __filename );
-            }
-        } );
+    function logDevice( device ) {
+		device.createdAt = Date.now();
+		if(device.hasOwnProperty('signal')){
+			device.$push = {signals:device.signal};
+			DeviceLog.findOneAndUpdate({mac:device.mac, removedAt:{$exists: false}}, device,{upsert:true},function(err, doc){
+	            if ( err ) {
+	                GLOBAL.LOGGER.log( err, "CRITICAL", __filename );
+	            } 
+			});
+		} else {
+
+			DeviceLog.findOneAndUpdate({mac:device.mac, removedAt:{ $exists: false}}, device,{upsert:true}, function(err, doc){
+	            if ( err ) {
+	                GLOBAL.LOGGER.log( err, "CRITICAL", __filename );
+	            } 
+			});
+		}
+		
     }
 
     function logDeviceRemove( deviceMac ) {
-        DeviceLog.find( {
-            'mac': deviceMac
-        } ).exists( 'removedAt', false ).exec( function ( err, result ) {
+		DeviceLog.findOneAndUpdate({mac:deviceMac, removedAt:{$exists: false}}, {removedAt: Date.now()}, function(err, doc){
             if ( err ) {
                 GLOBAL.LOGGER.log( err, "CRITICAL", __filename );
             }
-            for ( let i = 0; i < result.length; i += 1 ) {
-                result[ i ].removedAt = Date.now();
-                saveIt( result[ i ] );
-            }
-        } );
-
-        function saveIt( deviceLog ) {
-            deviceLog.save( function ( err ) {
-                if ( err ) {
-                    GLOBAL.LOGGER.log( err, "CRITICAL", __filename );
-                }
-            } );
-        }
+		});
     }
 
     function upsert( device, cb ) {
         device = JSON.parse( device );
-        logDevice( device );
-        Device.update( device.mac, device, {
-            upsert: true
-        }, function ( err ) {
+		device.updatedAt = Date.now();
+		logDevice(device);
+        Device.findOneAndUpdate( {mac:device.mac}, device, {
+            upsert: true,
+			new: true
+        }, function ( err, doc ) {
             if ( err ) {
                 GLOBAL.LOGGER.log( "Error updating device database", "FATAL", __filename );
             } else {
-
                 cb();
             }
-
         } );
     }
 
@@ -107,7 +94,7 @@ module.exports = ( function () {
         logDeviceRemove( mac );
         Device.remove( {
             mac: mac
-        }, function ( err ) {
+        }, function ( err, doc ) {
             if ( err ) {
                 GLOBAL.LOGGER.log( "Error removing device from database", "FATAL", __filename );
             } else {
@@ -117,7 +104,7 @@ module.exports = ( function () {
     }
 
     function getAll( cb ) {
-        Device.find( {}, '-_id',  function ( err, result ) {
+        Device.find( {}, '-_id -__v',  function ( err, result ) {
             if ( err ) {
                 GLOBAL.LOGGER.log( "Error getting devices from database", "FATAL", __filename );
             } else {
@@ -129,7 +116,7 @@ module.exports = ( function () {
     function getWithMac( mac, cb ) {
         Device.findOne( {
             mac: mac
-        },'-_id', function ( err, device ) {
+        },'-_id -__v', function ( err, device ) {
             if ( err ) {
                 GLOBAL.LOGGER.log( "Error getting devices from database", "FATAL", __filename );
             } else {
@@ -141,7 +128,7 @@ module.exports = ( function () {
     function getWithIP( ip, cb ) {
         Device.findOne( {
             ip: ip
-        },'-_id',function ( err, device ) {
+        },'-_id -__v',function ( err, device ) {
             if ( err ) {
                 GLOBAL.LOGGER.log( "Error getting devices from database", "FATAL", __filename );
             } else {
@@ -159,6 +146,21 @@ module.exports = ( function () {
             }
         } );
     }
+	
+	function purge(){
+		GLOBAL.LOGGER.log( "Purging Device and DeviceLog DB collection", "LOG", __filename );
+		Device.remove({}, function(err){
+			if(err){
+	        	GLOBAL.LOGGER.log( "Error purging Device DB collection", "FATAL", __filename );
+			}
+		});
+		
+		DeviceLog.remove({}, function(err){
+			if(err){
+	        	GLOBAL.LOGGER.log( "Error purging DeviceLog DB collection", "FATAL", __filename );
+			}
+		});
+	}
 
     return Object.freeze( {
         upsert,
@@ -166,7 +168,9 @@ module.exports = ( function () {
         getWithMac,
         getWithIP,
         getAll,
-        getHistory
+        getHistory,
+		purge,
+		cleanup
     } );
 
 }() );

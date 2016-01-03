@@ -13,6 +13,7 @@ module.exports = ( function () {
         stationMAC: String,
         stationIP: String,
         ssid: String,
+		name: String,
         os: String,
         cpu: String,
         peripherals: [ String ],
@@ -26,7 +27,7 @@ module.exports = ( function () {
 
     function upsert( pi, cb ) {
         pi = JSON.parse(pi);
-        PI.update( pi.mac, pi, {
+        PI.update({mac:pi.mac}, pi, {
             upsert: true
         }, function ( err, op ) {
             if ( err ) {
@@ -47,10 +48,21 @@ module.exports = ( function () {
             }
         } );
     }
+	
+	function purge(){
+		GLOBAL.LOGGER.log( "Purging PI DB collection", "LOG", __filename );
+		PI.remove({}, function(err){
+			if(err){
+	        	GLOBAL.LOGGER.log( "Error purging PI collection", "FATAL", __filename );
+			}
+		});
+		
+	}
 
     return Object.freeze( {
         getPI,
-        upsert
+        upsert,
+		purge
     } );
 
 }() );

@@ -58,5 +58,8 @@ if [ -n "$(tvservice -s | grep HDMI)" ];then
 	sudo -u pi xinit ${path}/scripts/browser.sh http://$login:$password@${server#*//}/$webstrate &
 fi
 
+echo "cleaning mongo database"
+sudo mongo webstrate-pi --eval "db.dropDatabase()" &
+
 echo "starting ${path}/webstrate-pi.js"
-sudo node ${path}/webstrate-pi.js > /var/log/webstrate-pi/logs.log 2> /var/log/webstrate-pi/errors.log
+# sudo node ${path}/webstrate-pi.js > /var/log/webstrate-pi/logs.log 2> /var/log/webstrate-pi/errors.log
