@@ -171,6 +171,21 @@ module.exports.webstrateAPI = {
 }
 
 module.exports.externalAPI = {
+    "^\/this$": {
+        description: "Get the information of the requesting device",
+        fn: function ( q, r ) {
+            if ( q.method === "GET" ) {
+                Device.getWithIP(q.connection.remoteAddress, function ( device ) {
+                    apiRequestReturn( r, {
+                        status: 'ok',
+                        device: device
+                    } );
+                } );
+            } else {
+                unsupportedMethod(r, q.method );
+            }
+        }
+    },
     "^\/devices$": {
         description: "Get all the devices within proxomity of PI",
         fn: function ( q, r ) {

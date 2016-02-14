@@ -12,8 +12,16 @@ try {
 }
 page.settings.userName = config.login;
 page.settings.password = config.password;
-
+/*
 page.open( config.server + '/' + config.webstrate, function ( status ) {
+    if ( status !== 'success' ) {
+        console.error( 'Unable to connection to the webstrate server <' + config.server + '>' );
+        phantom.exit( 1 );
+    }
+} );
+*/
+
+page.open( "http://devices.here", function ( status ) {
     if ( status !== 'success' ) {
         console.error( 'Unable to connection to the webstrate server <' + config.server + '>' );
         phantom.exit( 1 );
@@ -23,13 +31,23 @@ page.open( config.server + '/' + config.webstrate, function ( status ) {
 page.onInitialized = function () {
     page.onCallback = function ( data ) {
         if ( data.event === 'loaded' ) {
-            console.log( "Phantom loaded the " + config.webstrate + " webstrate on " + config.server );
+            //console.log( "Phantom loaded the " + config.webstrate + " webstrate on " + config.server );
         } else if ( data.event === 'api loaded' ) {
             console.log( "Phantom loaded the webstrate api for /" + config.webstrate + " on /" + config.webstrate + "api" );
         }
     };
     page.evaluate( function ( ws, ip, port ) {
         document.addEventListener( 'loaded', function () {
+			var nodes = document.getElementsByTagName('PROXIMAGIC');
+			for(var i = 0;i<nodes.length;i++){
+				if(nodes[i].dataset.ip === ip){
+					nodes[i].parentNode.removeChild(nodes[i]);
+				}
+			}
+			
+			document.body.innerHTML += '<proximagic data-ip="'+ip+'" data-port="'+port+'" data-webstrate="'+ws+'"style="display:none;"></proximagic>';
+			
+			/*
             function addIframes() {
                 var apiIframe = document.getElementById( 'api' );
 
@@ -108,9 +126,9 @@ page.onInitialized = function () {
                         "event": "api loaded"
                     } );
                 }, false );
-            }
+            } 
             addIframes();
-
+			*/
             window.callPhantom( {
                 "event": "loaded"
             } );
