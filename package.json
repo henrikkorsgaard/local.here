@@ -4,7 +4,6 @@
   "description": "",
   "main": "webstrate-pi.js",
   "scripts": {
-	"preinstall": "sudo scripts/setup.sh",
     "test": "mocha /modules/apiServer/apiServer.test.js"
   },
   "repository": {

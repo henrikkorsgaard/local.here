@@ -35,10 +35,12 @@ chmod +x /etc/init.d/webstrate-pi
 sudo update-rc.d webstrate-pi defaults
 
 # INSTALL DEPENDENCIES
-LIST_OF_DEPENDENCIES="mongodb tshark nmap libkrb5-dev matchbox" 
+LIST_OF_DEPENDENCIES="mongodb tshark nmap xorg xinit epiphany-browser libkrb5-dev matchbox" 
 echo "Installing dependencies"
 apt-get update
 apt-get install -y $LIST_OF_DEPENDENCIES
+
+sudo dpkg-reconfigure x11-common
 
 if [ -r /boot ]; then
 	if [ ! -f /boot/webstrate-pi.config ]; then
