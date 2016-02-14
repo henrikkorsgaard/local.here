@@ -80,7 +80,7 @@
 			}
 			let lines = stdout.split('\n');
 			for(var i = 0;i<lines.length;i++){
-				if(lines[i].indexOf("HERE") > -1){
+				if(lines[i].indexOf("HERE") > -1){ //way better to actually scan for stationName or somethng
 					try {
 						config.stationIP = lines[i].match(ipRegExp)[0];
 					} catch (e){

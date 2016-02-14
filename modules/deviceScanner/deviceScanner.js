@@ -134,12 +134,17 @@ module.exports = ( function () {
 						if(device.name.indexOf('.') !== -1){
 							device.name = device.name.substring(0, device.name.indexOf('.'));
 						}
+						
 
 						if(bits[5]){
 							device.ip =  bits[5].replace("(",'').replace(")",'');
 						} else {
 							device.ip = bits[4];
 							delete device.name;
+						}
+						
+						if(device.ip === scannerConfig.stationIP){
+							device.name = 'Station';
 						}
 						if(lines[i+2].split('(').filter( Boolean )[1]){
 							device.vendor = lines[i+2].split('(').filter( Boolean )[1].replace(')','');
