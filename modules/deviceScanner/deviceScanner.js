@@ -43,7 +43,7 @@ module.exports = ( function () {
 		nmapInterval = 30000;
 		nmapNetwork();
         
-		scanner = spawn( 'tshark', [ '-i', 'mon0', '-l', '-y', 'IEEE802_11_RADIO', '-Y', filter, '-T', 'fields', '-e', 'wlan.sa', '-e', 'radiotap.dbm_antsignal', '-e', 'wlan.sa_resolved' ] );
+		scanner = spawn( 'tshark', [ '-i', 'mon0', '-l' , '-n', '-y', 'IEEE802_11_RADIO', '-Y', filter, '-T', 'fields', '-e', 'wlan.sa', '-e', 'radiotap.dbm_antsignal', '-e', 'wlan.sa_resolved' ] );
 
         scanner.stdout.on( 'data', function ( data ) {
             let dataString = data.toString().replace( "\n", "" );
