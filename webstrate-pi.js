@@ -57,6 +57,7 @@
 	}
 
 	function getDeviceInfo(){
+		
 		exec('ifconfig wlan0', function(err, stdout, stderr){
 			if(err || stderr){
 				console.error("Unable to obtain configuration information");
@@ -72,6 +73,8 @@
 				process.exit(1);
 			}
 		});
+		
+		
 
 		exec('arp -a', function(err, stdout, stderr){
 			if(err || stderr){
@@ -80,7 +83,7 @@
 			}
 			let lines = stdout.split('\n');
 			for(var i = 0;i<lines.length;i++){
-				if(lines[i].indexOf("HERE") > -1){ //way better to actually scan for stationName or somethng
+				if(lines[i].indexOf(config.ssid) > -1){
 					try {
 						config.stationIP = lines[i].match(ipRegExp)[0];
 					} catch (e){

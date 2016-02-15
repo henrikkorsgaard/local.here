@@ -26,7 +26,7 @@ module.exports = ( function () {
         if ( !( this instanceof DeviceScanner ) ) {
             return new DeviceScanner( config );
         }
-
+		
         if ( config && config.hasOwnProperty( 'stationMAC' ) && config.hasOwnProperty( 'ssid' ) ) {
             scannerConfig = config;
             start();
@@ -144,7 +144,7 @@ module.exports = ( function () {
 						}
 						
 						if(device.ip === scannerConfig.stationIP){
-							device.name = 'Station';
+							device.name = scannerConfig.ssid;
 						}
 						if(lines[i+2].split('(').filter( Boolean )[1]){
 							device.vendor = lines[i+2].split('(').filter( Boolean )[1].replace(')','');
