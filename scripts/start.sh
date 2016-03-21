@@ -53,10 +53,11 @@ else
 	sudo ip link set mon0 up
 fi
 
-if [ -n "$(tvservice -s | grep HDMI)" ];then
-	echo "Setting up chrome on HDMI kiosk"
-	sudo -u pi xinit ${path}/scripts/browser.sh http://$login:$password@${server#*//}/$webstrate &
-fi
+#if [ -n "$(tvservice -s | grep HDMI)" ];then
+#	echo "Setting up chrome on HDMI kiosk"
+#        sudo -u pi xinit ${path}/scripts/browser.sh http://web:strate@webstrate.cs.au.dk/dlc170-projector &
+#	#sudo -u pi xinit ${path}/scripts/browser.sh http://$login:$password@${server#*//}/$webstrate &
+#fi
 
 echo "cleaning mongo database"
 sudo mongo webstrate-pi --eval "db.dropDatabase()" &

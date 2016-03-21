@@ -51,7 +51,7 @@ page.onInitialized = function () {
 						nodes[i].parentNode.removeChild(nodes[i]);
 					}
 				}
-				document.body.innerHTML += '<proximagic data-ip="'+phantomjs_ip+'" data-port="'+phantomjs_port+'" data-webstrate="'+phantomjs_ws+'"style="display:none;"></proximagic>';
+				document.body.innerHTML += '<proximagic data-ip="'+phantomjs_ip+'" data-port="'+phantomjs_port+'" data-webstrate="'+phantomjs_ws+'"></proximagic>';
 
             window.callPhantom( {
                 "event": "loaded"
