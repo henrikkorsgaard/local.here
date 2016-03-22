@@ -88,6 +88,21 @@ module.exports.internalAPI = {
 }
 
 module.exports.webstrateAPI = {
+    "^\/devices$": {
+        description: "Get all the devices within proxomity of PI",
+        fn: function ( q, r ) {
+            if ( q.method === "GET" ) {
+                Device.getAll( function ( devices ) {
+                    apiRequestReturn( r, {
+                        status: 'ok',
+                        devices: devices
+                    } );
+                } );
+            } else {
+                unsupportedMethod(r, q.method );
+            }
+        }
+    },
     "^\/\\w{32}$": {
         description: "Validate existing token",
         fn: function ( q, r ) {

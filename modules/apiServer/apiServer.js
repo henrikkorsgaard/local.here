@@ -69,7 +69,7 @@ module.exports = ( function () {
             if ( !match ) {
                 api.apiRequestReturn( r, {
                     status: 'error',
-                    response: "Unknown API request."
+                    response: "Unknown internal API request."
                 } );
             }
 
@@ -87,7 +87,7 @@ module.exports = ( function () {
             if ( !match ) {
                 api.apiRequestReturn( r, {
                     status: 'error',
-                    response: "Unknown API request."
+                    response: "Unknown webstrate API request."
                 } );
             }
         } else if ( requestIp.match( ipRegExp ) ) {
@@ -107,7 +107,6 @@ module.exports = ( function () {
                 } );
             }
         } else {
-			console.log("også")
             api.apiRequestReturn( r, {
                 status: 'error',
                 response: "Unable to identify origin and/or origin IP."
