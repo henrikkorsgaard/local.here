@@ -5,7 +5,6 @@ var args = system.args;
 var config;
 try {
     config = JSON.parse( args[ 1 ] );
-    console.log( "Setting up webstrate " + config.server + "/" + config.webstrate + " on phantomjs with the following PI ip: " + config.ip );
 } catch ( e ) {
     console.error( 'Unable to parse the config parameters from <' + args + '>' );
     phantom.exit( 1 );
@@ -20,6 +19,7 @@ page.open( config.server + '/' + config.webstrate, function ( status ) {
         console.error( 'Unable to connection to the webstrate server <' + config.server + '>' );
         phantom.exit( 1 );
     }
+	console.log("Opened "+config.webstrate);
 } );
 
 page.onInitialized = function () {
@@ -27,12 +27,39 @@ page.onInitialized = function () {
     page.evaluate( function ( phantomjs_ws, phantomjs_ip, phantomjs_port ) {
 		var proximagic;
 		document.addEventListener("loaded", function() {
-			document.body.innerHTML = '';
+			console.log("webstrate loaded");
+			document.body.innerHTML = '<proximagicNode ip="'+phantomjs_ip+'" port="'+phantomjs_port+'">Proximagic Node</proximagicNode>';
 	        hereIframe = document.createElement( 'iframe' );
 	        hereIframe.src = 'http://devices.here';
+			//hereIframe.src = 'http://webstrates.cs.au.dk/Nygaard295.devices';
 			document.body.appendChild( hereIframe );
+			hereIframe.onload = function(e){
+				var iframeDoc = hereIframe.contentDocument || hereIframe.contentWindow.document;
+				iframeDoc.addEventListener('loaded', function(e){
+					var doc = hereIframe.contentDocument || hereIframe.contentWindow.document;
+					var proximagicNodes = doc.getElementsByTagName('device-proximagic');
+					for(var i = 0;i< proximagicNodes.length; i++){
+						if(proximagicNodes[i].dataset.ip === phantomjs_ip){
+							proximagic = proximagicNodes[i];
+							break;
+						}
+					
+					}
+					if(!proximagic){
+						proximagic = doc.createElement('device-proximagic');
+					}
+					proximagic.dataset.ip = phantomjs_ip;
+					proximagic.dataset.port = phantomjs_port;
+					doc.body.appendChild(proximagic);
+					update();
+				});
+				
+			}
+			
 	        
-			hereIframe.addEventListener('transcluded', function(){
+			//hereIframe.addEventListener('transcluded', function(e){
+				//console.log("Transcluded devices.here")
+				/*
 				var doc = hereIframe.contentDocument || hereIframe.contentWindow.document;
 				var proximagicNodes = doc.getElementsByTagName('device-proximagic');
 				for(var i = 0;i< proximagicNodes.length; i++){
@@ -48,8 +75,8 @@ page.onInitialized = function () {
 				proximagic.dataset.ip = phantomjs_ip;
 				proximagic.dataset.port = phantomjs_port;
 				doc.body.appendChild(proximagic);
-				update();
-			});
+				update();*/
+				//});
 
 		});
 		

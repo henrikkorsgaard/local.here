@@ -1,23 +1,11 @@
 {
-  "name": "ws-rpi-discover",
+  "name": "webstrate-pi",
   "version": "1.0.0",
   "description": "",
   "main": "webstrate-pi.js",
   "scripts": {
-    "test": "mocha /modules/apiServer/apiServer.test.js"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/henrikkorsgaard/ws-rpi-discover.git"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Henrik Korsgaard",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/henrikkorsgaard/ws-rpi-discover/issues"
-  },
-  "homepage": "https://github.com/henrikkorsgaard/ws-rpi-discover#readme",
-  "dependencies": {
-    "mongoose": "^4.3.4",
-    "request": "^2.67.0"
-  }
+  "license": "ISC"
 }
