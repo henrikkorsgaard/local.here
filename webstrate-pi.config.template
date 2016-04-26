@@ -1,0 +1,20 @@
+# Configuration file for webstrate-pi.
+# Config file in /boot will be selected over config file in /webstrate-pi
+
+# Uncomment and save with correct values.
+
+# Webstrate server login configuration
+server=http://webstrates.cs.au.dk
+login=web
+password=strate
+
+# Webstrate this PI will watch. This will also be the hostname of this Raspberry PI.
+webstrate=Nygaard295.proximagic
+
+# Service configuration
+# API server port
+port=1337
+
+# WLAN configuration
+ssid=HERE
+wifi_password=here.local
