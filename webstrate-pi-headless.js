@@ -28,11 +28,27 @@ page.onInitialized = function () {
 		var proximagic;
 		var timer;
 		document.addEventListener("loaded", function() {
-			document.body.innerHTML = '<proximagicNode ip="'+phantomjs_ip+'" port="'+phantomjs_port+'">Proximagic Node</proximagicNode>';
-	        hereIframe = document.createElement( 'iframe' );
-	        hereIframe.src = 'http://devices.here';
-			//hereIframe.src = 'http://webstrates.cs.au.dk/Nygaard295.devices';
-			document.body.appendChild( hereIframe );
+			var meta = document.getElementById('meta');
+			var hereIframe = document.getElementById('devices');
+			
+			if(!meta){
+				meta = document.createElement('div');
+				meta.id = 'meta';
+				document.body.appendChild( meta );
+
+			}
+			meta.style.display = 'none';
+			meta.innerHTML ='<proximagicNode ip="'+phantomjs_ip+'" port="'+phantomjs_port+'">Proximagic Node</proximagicNode>';
+			
+			if(!hereIframe){
+		        hereIframe = document.createElement( 'iframe' );
+				hereIframe.id = 'devices';
+				document.body.appendChild( hereIframe );
+			}
+			
+			hereIframe.src = 'http://devices.here';
+			hereIframe.style.display = 'none';
+			
 			hereIframe.onload = function(e){
 				var iframeDoc = hereIframe.contentDocument || hereIframe.contentWindow.document;
 				iframeDoc.addEventListener('loaded', function(e){
@@ -67,7 +83,7 @@ page.onInitialized = function () {
 										proximagic = proximagic.cloneNode();
 									  	doc.body.appendChild(proximagic);
 										update();
-									  },2000);
+									  }, 2000);
 								  }
 							  }
 						  }
