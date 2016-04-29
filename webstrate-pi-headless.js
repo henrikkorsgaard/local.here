@@ -26,8 +26,8 @@ page.onInitialized = function () {
     
     page.evaluate( function ( phantomjs_ws, phantomjs_ip, phantomjs_port ) {
 		var proximagic;
+		var timer;
 		document.addEventListener("loaded", function() {
-			console.log("webstrate loaded");
 			document.body.innerHTML = '<proximagicNode ip="'+phantomjs_ip+'" port="'+phantomjs_port+'">Proximagic Node</proximagicNode>';
 	        hereIframe = document.createElement( 'iframe' );
 	        hereIframe.src = 'http://devices.here';
@@ -37,46 +37,50 @@ page.onInitialized = function () {
 				var iframeDoc = hereIframe.contentDocument || hereIframe.contentWindow.document;
 				iframeDoc.addEventListener('loaded', function(e){
 					var doc = hereIframe.contentDocument || hereIframe.contentWindow.document;
-					var proximagicNodes = doc.getElementsByTagName('device-proximagic');
+					var proximagicNodes = doc.getElementsByTagName('device');
 					for(var i = 0;i< proximagicNodes.length; i++){
 						if(proximagicNodes[i].dataset.ip === phantomjs_ip){
 							proximagic = proximagicNodes[i];
 							break;
 						}
-					
 					}
 					if(!proximagic){
-						proximagic = doc.createElement('device-proximagic');
+						proximagic = doc.createElement('device');
 					}
 					proximagic.dataset.ip = phantomjs_ip;
 					proximagic.dataset.port = phantomjs_port;
+					proximagic.dataset.ws = phantomjs_ws;
+					proximagic.dataset.type = "Proximagic Node";
 					doc.body.appendChild(proximagic);
+ 
+					var observer = new MutationObserver(function(mutations) {
+					  mutations.forEach(function(mutation) {
+						  if(mutation.type === "childList" && mutation.removedNodes.length > 0){
+							  for(var i = 0;i<mutation.removedNodes.length;i++){
+								  if(mutation.removedNodes[i] === proximagic){
+									  if(timer){
+										  clearInterval(timer);
+									  }
+									  
+									  proximagic.innerHTML = '';
+									  setTimeout(function(){
+										proximagic = proximagic.cloneNode();
+									  	doc.body.appendChild(proximagic);
+										update();
+									  },2000);
+								  }
+							  }
+						  }
+					  });    
+					});
+ 
+ 
+					// pass in the target node, as well as the observer options
+					observer.observe(proximagic.parentNode, { attributes: false, childList: true, characterData: false });
 					update();
 				});
 				
 			}
-			
-	        
-			//hereIframe.addEventListener('transcluded', function(e){
-				//console.log("Transcluded devices.here")
-				/*
-				var doc = hereIframe.contentDocument || hereIframe.contentWindow.document;
-				var proximagicNodes = doc.getElementsByTagName('device-proximagic');
-				for(var i = 0;i< proximagicNodes.length; i++){
-					if(proximagicNodes[i].dataset.ip === phantomjs_ip){
-						proximagic = proximagicNodes[i];
-						break;
-					}
-					
-				}
-				if(!proximagic){
-					proximagic = doc.createElement('device-proximagic');
-				}
-				proximagic.dataset.ip = phantomjs_ip;
-				proximagic.dataset.port = phantomjs_port;
-				doc.body.appendChild(proximagic);
-				update();*/
-				//});
 
 		});
 		
@@ -93,7 +97,7 @@ page.onInitialized = function () {
 							var devices = response.devices;
 							proximagic.innerHTML = '';
 							for(var i = 0;i<devices.length;i++){
-								proximagic.innerHTML += '<device data-ip="'+devices[i].ip+'" data-mac="'+devices[i].mac+'" data-signal="'+devices[i].signal+'" data-name="'+devices[i].name+'" data-vendor="'+devices[i].vendor+'"></device>';
+								proximagic.innerHTML += '<detected-device data-ip="'+devices[i].ip+'" data-mac="'+devices[i].mac+'" data-signal="'+devices[i].signal+'" data-name="'+devices[i].name+'" data-vendor="'+devices[i].vendor+'"></detected-device>';
 							}
 						} catch(e){
 							console.log(e);
@@ -103,7 +107,7 @@ page.onInitialized = function () {
 			    	}
 				}
 			};	
-			setTimeout(update, 10000);
+			timer = setTimeout(update, 10000);
 		}
     }, config.webstrate, config.ip, config.port );
 };

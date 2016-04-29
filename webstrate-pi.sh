@@ -49,12 +49,12 @@ else
 	sleep 5
 fi
 
-sudo /home/pi/webstrate-pi/bin/horst -i wlan0 -N -p 4260 &> /dev/null &
+#sudo /home/pi/webstrate-pi/bin/horst -i wlan0 -N -p 4260 &> /dev/null &
 
-cd /home/pi/webstrate-pi/proximagic
-sudo java -jar ProxiMagicNode.jar 2> /var/log/webstrate-pi.log &
+#cd /home/pi/webstrate-pi/proximagic
+#sudo java -jar ProxiMagicNode.jar 2> /var/log/webstrate-pi.log &
 
-sudo node /home/pi/webstrate-pi/webstrate-pi.js "{\"ip\":\"$ip\", \"station\":\"$station\", \"port\":\"$port\"}" &> /var/log/webstrate-pi.log &
+#sudo node /home/pi/webstrate-pi/webstrate-pi.js "{\"ip\":\"$ip\", \"station\":\"$station\", \"port\":\"$port\"}" &> /var/log/webstrate-pi.log &
 
 cd /home/pi/webstrate-pi
-sudo ./bin/phantomjs --web-security=no webstrate-pi-headless.js "{\"ip\":\"$ip\", \"server\":\"$server\", \"port\":\"$port\", \"login\":\"$login\", \"password\":\"$password\", \"webstrate\":\"$webstrate\"}" &> /var/log/webstrate-pi.log &
+sudo ./bin/phantomjs --web-security=no webstrate-pi-headless.js "{\"ip\":\"$ip\", \"server\":\"$server\", \"port\":\"$port\", \"login\":\"$login\", \"password\":\"$password\", \"webstrate\":\"$webstrate\"}" #&> /var/log/webstrate-pi.log &
