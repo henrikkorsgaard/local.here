@@ -113,7 +113,7 @@ page.onInitialized = function () {
 							var devices = response.devices;
 							proximagic.innerHTML = '';
 							for(var i = 0;i<devices.length;i++){
-								proximagic.innerHTML += '<detected-device data-ip="'+devices[i].ip+'" data-mac="'+devices[i].mac+'" data-signal="'+devices[i].signal+'" data-name="'+devices[i].name+'" data-vendor="'+devices[i].vendor+'"></detected-device>';
+								proximagic.innerHTML += '<detected-device data-ip="'+devices[i].ip+'" data-mac="'+devices[i].mac+'" data-signal="'+devices[i].signal+'" data-hostname="'+devices[i].hostname+'" data-vendor="'+devices[i].vendor+'"></detected-device>';
 							}
 						} catch(e){
 							console.log(e);
