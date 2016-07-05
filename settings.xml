@@ -4,7 +4,7 @@
 	<installationid>5348413228226f73742229000000000000000000000000000000000000000000</installationid>
 	<horst host="localhost" port="4260" channel="6" />
 	<nmap target="192.168.1.0/24" interval="60000" />
-	<db sendUrl="http://localhost:1337/devices" sendTimer="1000" uniqueId="3966383664303831383834633764363539613266656161306335356164303135" />
+	<db sendUrl="http://localhost:1337/devices" sendTimer="2000" uniqueId="3966383664303831383834633764363539613266656161306335356164303135" />
 	<filter>
 		<bssid enabled="false">00:00:00:00:00:00</bssid>
 		<essid enabled="true">HERE</essid>

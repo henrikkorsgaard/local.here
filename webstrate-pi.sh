@@ -52,7 +52,7 @@ fi
 sudo /home/pi/webstrate-pi/bin/horst -i wlan0 -N -p 4260 &> /dev/null &
 
 cd /home/pi/webstrate-pi/proximagic
-sudo java -jar ProxiMagicNode.jar 2> /var/log/webstrate-pi.log &
+sudo java -jar ProxiMagicNode.jar &> /dev/null &
 
 sudo node /home/pi/webstrate-pi/webstrate-pi.js "{\"ip\":\"$ip\", \"station\":\"$station\", \"port\":\"$port\"}" &> /var/log/webstrate-pi.log &
 

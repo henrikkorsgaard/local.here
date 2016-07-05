@@ -66,7 +66,8 @@ page.onInitialized = function () {
 					proximagic.dataset.ip = phantomjs_ip;
 					proximagic.dataset.port = phantomjs_port;
 					proximagic.dataset.ws = phantomjs_ws;
-					proximagic.dataset.type = "Proximagic Node";
+					proximagic.dataset.type = "ProximagicNode";
+					proximagic.innerHTML ='<name>ProximagicNode</name><description>This device scans the local area network for devices in proximity. Nmap is used to scan the network and establish current LAN/WLAN clients. Horst is used to scan RadioTap headers for WLAN signal strength.</description><api><ul><legend>API requests</legend><li>ip:port/this</li><li>ip:port/devices</li><li>ip:port/devices/{ip|mac}</li></ul></api>';
 					doc.body.appendChild(proximagic);
  
 					var observer = new MutationObserver(function(mutations) {
@@ -78,53 +79,25 @@ page.onInitialized = function () {
 										  clearInterval(timer);
 									  }
 									  
-									  proximagic.innerHTML = '';
 									  setTimeout(function(){
 										proximagic = proximagic.cloneNode();
+										proximagic.innerHTML ='<name>ProximagicNode</name><description>This device scans the local area network for devices in proximity. Nmap is used to scan the network and establish current LAN/WLAN clients. Horst is used to scan RadioTap headers for WLAN signal strength.</description><api><ul><legend>API requests</legend><li>ip:port/this</li><li>ip:port/devices</li><li>ip:port/devices/{ip|mac}</li></ul></api>';
 									  	doc.body.appendChild(proximagic);
-										update();
+
 									  }, 2000);
 								  }
 							  }
 						  }
 					  });    
 					});
- 
- 
+  
 					// pass in the target node, as well as the observer options
 					observer.observe(proximagic.parentNode, { attributes: false, childList: true, characterData: false });
-					update();
 				});
 				
 			}
 
 		});
-		
-		function update(){
-			var xhr = new XMLHttpRequest();
-			xhr.open('GET', 'http://'+phantomjs_ip+':'+phantomjs_port+'/devices');
-			xhr.send(null);
-			
-			xhr.onreadystatechange = function () {
-				if (xhr.readyState === 4) {
-			    	if (xhr.status === 200) {
-						try {
-							var response = JSON.parse(xhr.responseText);
-							var devices = response.devices;
-							proximagic.innerHTML = '';
-							for(var i = 0;i<devices.length;i++){
-								proximagic.innerHTML += '<detected-device data-ip="'+devices[i].ip+'" data-mac="'+devices[i].mac+'" data-signal="'+devices[i].signal+'" data-hostname="'+devices[i].hostname+'" data-vendor="'+devices[i].vendor+'"></detected-device>';
-							}
-						} catch(e){
-							console.log(e);
-						}
-			        } else {
-			        	console.log("Potential error in ajax call " + xhr.status + " - " + xhr.responseText);
-			    	}
-				}
-			};	
-			timer = setTimeout(update, 10000);
-		}
     }, config.webstrate, config.ip, config.port );
 };
 
