@@ -13,13 +13,33 @@
 	var ipRegExp = new RegExp( /\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/g );
 	http.createServer(internalAPIHandler).listen(config.port, '127.0.0.1');
 	http.createServer(externalAPIHandler).listen(config.port, config.ip);
-	console.log(config);
+
+	setTimeout(function(){
+		
+		var options = {
+			host: "127.0.0.1",
+			port: config.port,
+		  	path: '/pi',
+		  	method: 'PUT',
+		  	headers: {
+				'Content-Type': 'application/json',
+			}
+		};
+
+		var req = http.request(options, function(res) {
+		});
+
+		var data = {mac: config.mac, webstrate:config.webstrate, ip: config.ip};
+		req.write(JSON.stringify(data));
+		req.end();		
+	},5000);
 	/*
 	* Localhost API used for scanners etc.
 	*/
 	
 	function internalAPIHandler(req, res){
-	    var match = false;
+		console.log(req.url);
+		var match = false;
 	    for ( var obj in api.internalAPI ) {
 	        var re = new RegExp( obj );
 	        if ( req.url.match( re ) ) {
@@ -41,7 +61,8 @@
 	*/
 	
 	function externalAPIHandler(req, res){
-        var requestIp = req.connection.remoteAddress;
+        
+		var requestIp = req.connection.remoteAddress;
         var origin = req.headers.host;
         if ( req.url === '/favicon.ico' ) {
             res.writeHead( 200, {
