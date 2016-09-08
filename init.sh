@@ -2,31 +2,33 @@
 
 start(){
 	
-	cd /home/pi/webstrate-pi
-	if [[ ! -f /boot/webstrate-pi.config ]] ; then
-		echo "missing configuration file in /boot/webstrate-pi.config"
-		cp webstrate-pi.config.template /boot/webstrate-pi.config
-	fi
-
-	source /boot/webstrate-pi.config
-
-	if [[ -z $server || -z $login || -z $password || -z $webstrate || -z $port || -z $ssid || -z $wifi_password ]]; then
-		echo "Incorrect configuration file /boot/webstrate-pi.config"
-		systemctl stop webstrate-pi.service
+	echo "" > /home/pi/log
+	
+	cd /home/pi/proximagicYFI
+	if [[ ! -f /boot/proximagic.config ]] ; then
+		cp proximagic.config.template /boot/proximagic.config
+		echo "Please configure proximagic via the config file in /boot/"
 		exit
 	fi
 
-	if [ -z "$(hostname | grep ^$webstrate)" ]; then
+	source /boot/proximagic.config
+
+	if [[ -z $name || -z $port || -z $ssid || -z $password ]]; then
+		echo "Incorrect configuration file /boot/proximagic.config"
+		exit
+	fi
+
+	if [ -z "$(hostname | grep ^$name)" ]; then
 		echo "Changing hostname and restaring network service"
-		printf $webstrate > /etc/hostname
+		printf $name > /etc/hostname
 		printf "127.0.0.1\tlocalhost\n" > /etc/hosts
-		printf "127.0.0.1\t$webstrate" >> /etc/hosts
-		hostname $webstrate
+		printf "127.0.0.1\t$name" >> /etc/hosts
+		hostname $name
 		sleep 1
 	fi
 
-	wpa_passphrase $ssid $wifi_password > /etc/wpa_supplicant/wpa_supplicant.conf
-	systemctl start networking.service &
+	sudo wpa_passphrase $ssid $password > /etc/wpa_supplicant/wpa_supplicant.conf
+	sudo systemctl start networking.service &
 	sleep 1
 
 	while [ `ifconfig wlan0 | grep -q "inet addr" ; echo $?` == 1 ]; do
@@ -40,22 +42,22 @@ start(){
 
 	# Setup mongodb in ram
 	if [ ! -d /ramdata ] ; then
-		mkdir /ramdata
+		sudo mkdir /ramdata
 	fi
 	
-	mount -t tmpfs -o size=64M tmpfs /ramdata/
-	systemctl start mongodb
+	sudo mount -t tmpfs -o size=64M tmpfs /ramdata/
+	sudo systemctl start mongodb
 	
-	sudo /home/pi/webstrate-pi/bin/horst -i wlan0 -N -p 4260 -q &>/dev/null &
-	
-	cd /home/pi/webstrate-pi/proximagic
+	sudo node /home/pi/proximagicYFI/server.js "{\"ip\":\"$ip\", \"station\":\"$station\", \"port\":\"$port\", \"mac\":\"$mac\", \"name\":\"$name\"}" &> /dev/null &
+}
+	cd /home/pi/proximagicYFI/proximagic
 	sudo java -jar ProxiMagicNode.jar &> /dev/null &
 	
-	#cd /home/pi/webstrate-pi
-	#sudo ./bin/phantomjs --web-security=no webstrate-pi-headless.js "{\"ip\":\"$ip\", \"server\":\"$server\", \"port\":\"$port\", \"login\":\"$login\", \"password\":\"$password\", \"webstrate\":\"$webstrate\"}" &> /home/pi/log &
+	sudo horst -i wlan0 -N -p 4260 &>/dev/null &
 	
-	sudo node /home/pi/webstrate-pi/server.js "{\"ip\":\"$ip\", \"station\":\"$station\", \"port\":\"$port\", \"mac\":\"$mac\", \"webstrate\":\"$webstrate\"}"
-}
+	
+	
+	
 
 stop(){
 	echo "Stopping!"

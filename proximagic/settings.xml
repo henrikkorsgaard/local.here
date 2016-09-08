@@ -7,6 +7,6 @@
 	<db sendUrl="http://localhost:1337/devices" sendTimer="1000" uniqueId="3966383664303831383834633764363539613266656161306335356164303135" />
 	<filter>
 		<bssid enabled="false">00:00:00:00:00:00</bssid>
-		<essid enabled="false">HERE</essid>
+		<essid enabled="true">HERE</essid>
 	</filter>
 </proximagicnode>

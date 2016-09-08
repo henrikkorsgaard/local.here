@@ -2,11 +2,11 @@
 ( function () {
 	'use strict';
 
-	process.title = 'webstrate-pi';
+	process.title = 'proximagic';
 	
 	var http = require( 'http' );
 	var mongo = require( 'mongoose' );
-	mongo.connect( 'mongodb://localhost/webstrate-pi' );
+	mongo.connect( 'mongodb://localhost/proximagic' );
 	
 	var api = require( './lib/api.js' );
 	var config = JSON.parse(process.argv[2]);
@@ -29,7 +29,7 @@
 		var req = http.request(options, function(res) {
 		});
 
-		var data = {mac: config.mac, webstrate:config.webstrate, ip: config.ip};
+		var data = {mac: config.mac, webstrate:config.name, ip: config.ip};
 		req.write(JSON.stringify(data));
 		req.end();		
 	},5000);
@@ -38,7 +38,6 @@
 	*/
 	
 	function internalAPIHandler(req, res){
-		console.log(req.url);
 		var match = false;
 	    for ( var obj in api.internalAPI ) {
 	        var re = new RegExp( obj );
@@ -86,7 +85,7 @@
 		    if ( !match ) {
 		        api.apiRequestReturn( res, {
 		            status: 'error',
-		            response: "Unknown webstrate API request."
+		            response: "Unknown proximagicYFI API request."
 		        } );
 		    } 
 		} else {

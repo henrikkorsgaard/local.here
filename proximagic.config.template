@@ -1,0 +1,15 @@
+# Configuration file for proximagicYFI.
+# Config file in /boot will be selected over config file in /webstrate-pi
+
+# Uncomment and save with correct values.
+
+# Name of the proximagic node.
+name=
+
+# Service configuration
+# API server port
+port=
+
+# WLAN configuration
+ssid=
+password=
