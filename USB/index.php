@@ -46,7 +46,7 @@ if(in_array ($substrate , $substrates, true)){
 	exit();
 } else if($substrate == "ap"){
 	$sys = exec("cat /sys/class/net/eth0/address", $mac);
-	$data = ['mac' => $mac[0],'location' => $location];
+	$data = ['mac' => $mac[0],'place' => $place, 'location' => $location];
 	
 	header('Content-type: application/json');
 	header('Access-Control-Allow-Origin: *');
