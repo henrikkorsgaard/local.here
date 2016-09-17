@@ -11,7 +11,9 @@ $place = "myOffice" will route to webstrateServerOfChoice.org/myOffice
 
 */
 
-$place = "firstfloor";
+
+$place = "building";
+$location = "firstfloor";
 
 /*
 $substrates contains the particular substrates used in the local information space. They will all create webstrates with the pattern $place.substrateName Most common are:
@@ -44,7 +46,7 @@ if(in_array ($substrate , $substrates, true)){
 	exit();
 } else if($substrate == "ap"){
 	$sys = exec("cat /sys/class/net/eth0/address", $mac);
-	$data = ['mac' => $mac[0],'place' => $place];
+	$data = ['mac' => $mac[0],'location' => $location];
 	
 	header('Content-type: application/json');
 	header('Access-Control-Allow-Origin: *');
