@@ -47,6 +47,7 @@ if(in_array ($substrate , $substrates, true)){
 	$data = ['mac' => $mac[0],'place' => $place];
 	
 	header('Content-type: application/json');
+	header('Access-Control-Allow-Origin: *');
 	echo json_encode($data);
 	exit();
 } else if($substrate == "this"){
@@ -68,6 +69,7 @@ if(in_array ($substrate , $substrates, true)){
 	$data = ['signal' => $signal, 'ip' => $ip];
 	
 	header('Content-type: application/json');
+	header('Access-Control-Allow-Origin: *');
 	echo json_encode($data);
 	exit();
 } else {
