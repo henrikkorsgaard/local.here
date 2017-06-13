@@ -3,11 +3,12 @@
 	'use strict';
 	process.title = 'proximagic-api-server';
 	var http = require( 'http' );
-	http.createServer(apiServer).listen(config.port, '127.0.0.1');
+	http.createServer(apiServer).listen(80, '192.168.1.2');
 
 	function apiServer(request, response){
 		console.log("got something!");
-
+		response.writeHead(200);
+            	response.end();
 
 
 	}
