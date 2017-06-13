@@ -2,7 +2,7 @@
 ( function () {
 	'use strict';
 	process.title = 'proximagic-api-server';
-
+	var http = require( 'http' );
 	http.createServer(apiServer).listen(config.port, '127.0.0.1');
 
 	function apiServer(request, response){
