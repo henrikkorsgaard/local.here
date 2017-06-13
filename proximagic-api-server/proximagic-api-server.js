@@ -1,21 +1,34 @@
 /*global console, process, require*/
 ( function () {
 	'use strict';
+	process.title = 'proximagic-api-server';
 
-	process.title = 'proximagic';
-	
+	http.createServer(apiServer).listen(config.port, '127.0.0.1');
+
+	function apiServer(request, response){
+		console.log("got something!");
+
+
+
+	}
+
+
+	/*
 	var http = require( 'http' );
 	var mongo = require( 'mongoose' );
 	mongo.connect( 'mongodb://localhost/proximagic' );
-	
+
 	var api = require( './lib/api.js' );
 	var config = JSON.parse(process.argv[2]);
 	var ipRegExp = new RegExp( /\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/g );
+
 	http.createServer(internalAPIHandler).listen(config.port, '127.0.0.1');
 	http.createServer(externalAPIHandler).listen(config.port, config.ip);
 
+
+
 	setTimeout(function(){
-		
+
 		var options = {
 			host: "127.0.0.1",
 			port: config.port,
@@ -31,12 +44,12 @@
 
 		var data = {mac: config.mac, webstrate:config.name, ip: config.ip};
 		req.write(JSON.stringify(data));
-		req.end();		
+		req.end();
 	},5000);
 	/*
 	* Localhost API used for scanners etc.
 	*/
-	
+
 	function internalAPIHandler(req, res){
 		var match = false;
 	    for ( var obj in api.internalAPI ) {
@@ -54,13 +67,13 @@
 	        } );
 		}
 	}
-	
+
 	/*
 	* External API used for API request on PI ip.
 	*/
-	
+
 	function externalAPIHandler(req, res){
-        
+
 		var requestIp = req.connection.remoteAddress;
         var origin = req.headers.host;
         if ( req.url === '/favicon.ico' ) {
@@ -70,7 +83,7 @@
             res.end();
 			return;
         }
-		
+
 		if(requestIp === config.ip){
 		    var match = false;
 		    for ( var obj in api.webstrateAPI ) {
@@ -87,7 +100,7 @@
 		            status: 'error',
 		            response: "Unknown proximagicYFI API request."
 		        } );
-		    } 
+		    }
 		} else {
 		    var match = false;
 		    for ( var obj in api.externalAPI ) {
@@ -107,6 +120,3 @@
 		}
 	}
 }() );
-
-
-
