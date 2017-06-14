@@ -11,7 +11,7 @@
 	//TODO: proximitynode (get/post)
 	//TODO: devices (get)
 	//TODO: this (get)
-
+	console.log(api);
 	http.createServer(apiServer).listen(80, '192.168.1.2');
 
 	function apiServer(request, response){
@@ -23,7 +23,7 @@
             response.end();
 			return;
         }
-
+		console.log(request.url);
 		var match = false;
 		for ( var obj in api ) {
 			var re = new RegExp( obj );
