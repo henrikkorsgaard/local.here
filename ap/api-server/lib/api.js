@@ -37,7 +37,7 @@ module.exports.api = {
                 console.log("proximagicnode GET!");
             } else if (q.method === "POST"){
                 console.log("proximagicnode POST!");
-                apiResponse(r, {
+                api.apiResponse(r, {
                     status: 'ok'
                 });
             } else {
