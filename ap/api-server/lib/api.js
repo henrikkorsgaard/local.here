@@ -37,6 +37,9 @@ module.exports.api = {
                 console.log("proximitynode GET!");
             } else if (q.method === "POST"){
                 console.log("proximitynode POST!");
+                apiResponse(r, {
+                    status: 'ok'
+                });
             } else {
                 unsupportedMethod(q, r);
             }
