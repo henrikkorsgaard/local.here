@@ -45,7 +45,7 @@ module.exports.api = {
     unsupportedMethod: (q, r) => {
         apiResponse(r, {
             status: 'error',
-            response: 'This API request does not support method '+q.method;
+            response: 'This API request does not support method '+q.method
         });
     },
     apiResponse: (r, msg) => {
