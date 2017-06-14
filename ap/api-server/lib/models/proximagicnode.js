@@ -3,7 +3,7 @@ module.exports = ( function () {
 
     let mongoose = require( 'mongoose' );
     let Schema = mongoose.Schema;
-    let proximityNodeSchema = new Schema( {
+    let proximagicNodeSchema = new Schema( {
         mac: {
             type: String,
             required: true,
@@ -17,7 +17,7 @@ module.exports = ( function () {
         }
     } );
 
-    let ProximityNode = mongoose.model( 'ProximityNode', proximityNodeSchema );
+    let ProximagicNode = mongoose.model( 'ProximagicNode', proximagicNodeSchema );
 
     function upsert( pi, cb ) {
 		PI.remove({}, function(err){

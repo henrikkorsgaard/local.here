@@ -31,12 +31,12 @@ module.exports.api = {
             }
         }
     },
-    "^\/proximitynode$": {
+    "^\/proximagicnode$": {
         func: (q, r) => {
             if(q.method === "GET") {
-                console.log("proximitynode GET!");
+                console.log("proximagicnode GET!");
             } else if (q.method === "POST"){
-                console.log("proximitynode POST!");
+                console.log("proximagicnode POST!");
                 apiResponse(r, {
                     status: 'ok'
                 });
