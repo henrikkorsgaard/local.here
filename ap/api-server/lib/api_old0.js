@@ -9,6 +9,11 @@ let Token = require( './models/token.js' );
 let crypto = require( 'crypto' );
 let algorithm = 'aes-256-ctr';
 
+module.exports.api = {
+    
+
+}
+
 module.exports.internalAPI = {
     "^\/devices$": {
         description: "PUT",

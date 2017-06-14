@@ -3,21 +3,21 @@ module.exports = ( function () {
 
     let mongoose = require( 'mongoose' );
     let Schema = mongoose.Schema;
-    let piSchema = new Schema( {
+    let proximityNodeSchema = new Schema( {
         mac: {
             type: String,
             required: true,
             unique: true
         },
         ip: String,
-		webstrate: String,
+		name: String,
         updatedAt: {
             type: Date,
             default: Date.now
         }
     } );
 
-    let PI = mongoose.model( 'PI', piSchema );
+    let ProximityNode = mongoose.model( 'ProximityNode', proximityNodeSchema );
 
     function upsert( pi, cb ) {
 		PI.remove({}, function(err){
@@ -34,9 +34,9 @@ module.exports = ( function () {
 	                cb();
 	            }
 
-	        } );	
+	        } );
 		});
-    }  
+    }
 
     function getPI( cb ) {
         PI.findOne( {},'-_id', function ( err, pi ) {
@@ -47,7 +47,7 @@ module.exports = ( function () {
             }
         } );
     }
-	
+
 	function purge(){
 		GLOBAL.LOGGER.log( "Purging PI DB collection", "LOG", __filename );
 		PI.remove({}, function(err){
@@ -55,7 +55,7 @@ module.exports = ( function () {
 				console.error("Database error in Pi.js");
 			}
 		});
-		
+
 	}
 
     return Object.freeze( {
