@@ -37,7 +37,7 @@
 		if ( !match ) {
 			api.apiResponse( response, {
 				status: 'error',
-				response: 'Unknown proximagic API request';
+				response: 'Unknown proximagic API request'
 			} );
 		}
 

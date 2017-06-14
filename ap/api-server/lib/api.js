@@ -34,9 +34,9 @@ module.exports.api = {
     "^\/proximitynode$": {
         func: (q, r) => {
             if(q.method === "GET") {
-                console.log("PROXIMITYNODE GET!");
+                console.log("proximitynode GET!");
             } else if (q.method === "POST"){
-                console.log("PROXIMITYNODE POST!");
+                console.log("proximitynode POST!");
             } else {
                 unsupportedMethod(q, r);
             }
