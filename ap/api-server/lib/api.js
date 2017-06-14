@@ -1,6 +1,6 @@
 'use strict';
 
-module.exports.api = api = {
+let api = {
     "^\/devices$": {
         func: (q, r) => {
             if(q.method === "GET") {
@@ -68,3 +68,5 @@ module.exports.api = api = {
         r.end();
     }
 }
+
+module.exports.api = api;
