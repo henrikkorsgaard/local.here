@@ -115,7 +115,6 @@ module.exports = ( function () {
 				}
 				d = d.toJSON();
 				d.closestProximagicnode = closestProximagicnode;
-				console.log(d);
 				callback(d);
 			}
 		});

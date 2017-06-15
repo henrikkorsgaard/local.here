@@ -19,7 +19,6 @@ let api = {
         func: (q, r) => {
             if(q.method === "GET") {
                 console.log("TOKEN GET!");
-
             } else {
                 api.unsupportedMethod(q, r);
             }
@@ -72,17 +71,12 @@ let api = {
         });
     },
     apiResponse: (r, msg) => {
-        if ( msg.status !== 'ok' ) {
-            r.writeHead( 418, {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*'
-            } );
-        } else {
-            r.writeHead( 200, {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*'
-            } );
-        }
+        
+        r.writeHead( 200, {
+        	'Content-Type': 'application/json',
+        	'Access-Control-Allow-Origin': '*'
+        } );
+       
 
         r.write( JSON.stringify( msg ) );
         r.end();
