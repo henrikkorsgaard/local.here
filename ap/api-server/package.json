@@ -1,0 +1,14 @@
+{
+  "name": "api-server",
+  "version": "1.0.0",
+  "description": "API server for local.here",
+  "main": "api-server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Henrik Korsgaard",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "mongoose": "^4.10.6"
+  }
+}

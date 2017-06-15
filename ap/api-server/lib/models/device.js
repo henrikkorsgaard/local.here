@@ -2,163 +2,129 @@ module.exports = ( function () {
     'use strict';
     let mongoose = require( 'mongoose' );
     let Schema = mongoose.Schema;
+	
+	let proxiSchema = mongoose.Schema(
+    	{mac:String, name:String,signal:Number}
+	,{ _id : false });
+	
     let deviceSchema = new Schema( {
         mac: {
             type: String,
             required: true,
             unique: true
         },
-        signal: Number,
-        user_agent: String,
+		proximagicnodes:[proxiSchema],
+		userAgent:String,
         ip: String,
 		vendor:String,
         hostname: String,
-        updatedAt: Date
+        lastSeen: Date
     } );
-
-    let deviceLogSchema = new Schema( {
-        mac: String,
-        signals: [ Number ],
-        user_agent: String,
-		vendor: String,
-        ip: String,
-        hostname: String,
-        createdAt: Date,
-        removedAt: Date
-    } );
-
 
     let Device = mongoose.model( 'Device', deviceSchema );
 
-
-	function cleanup(cb){
-		let expired = (new Date(Date.now()-120000));
-		Device.find({ $and: [{$or: [{updatedAt:{$lt: expired}}]},{ $or: [{name:{$exists: false}}]}]}, function(err, doc){
-			if ( err ) {
-                console.error("Database error in Device.js");
-            }
-			if(doc){
-				for(var i = 0;i<doc.length;i++){
-					remove(doc[i].mac, function(){});
-				}
+    function upsert( device, proximagicnode ) {
+		Device.findOne({mac:device.mac}, (err, d) => {
+			if(err){
+				console.log("Error: device.js find!");
 			}
-			cb();
-		});
-	}
-
-    function upsert( device, cb ) {
-        device = JSON.parse( device );
-
-        Device.findOne( {
-            mac: device.mac
-        }, function ( err, d ) {
-            if ( err ) {
-                console.error("Database error in Device.js");
-            } else {
-
-				if(!d){
-					var ip = device.ip === '0.0.0.0' ? undefined : device.ip;
-					var nDevice = new Device({
-						mac:device.mac,
-						signal:device.signal,
-						vendor:device.vendor,
-						ip:ip,
-						hostname:device.hostname,
-						updatedAt:Date.now()
-					});
-					nDevice.save(function(err){
-						if(err){
-							console.log("Database error in Device.js");
-						}
-					});
-				} else {
-					device.ip = device.ip === '0.0.0.0' ? d.ip : device.ip;
-					device.updatedAt = Date.now();
-					for(var k in device){
-						d[k] = device[k];
+			
+			if(!d){
+				d = new Device({
+					mac:device.mac,
+					ip: device.ip,
+					proximagicnodes: [{mac:proximagicnode.mac, name:proximagicnode.mac, signal:device.signal}],
+					vendor: device.vendor,
+					hostname: device.hostname,
+					lastSeen: Date.now()		
+				});
+				
+				d.save( (err) => {
+					if(err){
+						console.log(err);
+						console.log("Error in device.js insert save");
 					}
-					d.save(function(err){
-						if(err){
-							console.log("Database error in Device.js [L112]");
-						}
-					});
+				});
+				
+			} else {
+				if(device.hasOwnProperty("vendor")){
+					d.vendor = device.vendor;
 				}
-				cb();
-            }
-        } );
-    }
-
-    function remove( mac, cb ) {
-
-        Device.remove( {
-            mac: mac
-        }, function ( err, doc ) {
-            if ( err ) {
-               console.error("Database error in Device.js");
-            } else {
-                cb();
-            }
-        } );
-    }
-
-    function getAll( cb ) {
-        Device.find( {}, '-_id -__v',  function ( err, result ) {
-            if ( err ) {
-				console.error("Database error in Device.js");
-            } else {
-                cb( result );
-            }
-        } );
-    }
-
-    function getWithMac( mac, cb ) {
-        Device.findOne( {
-            mac: mac
-        },'-_id -__v', function ( err, device ) {
-            if ( err ) {
-                console.error("Database error in Device.js");
-            } else {
-                cb( device );
-            }
-        } );
-    }
-
-    function getWithIP( ip, cb ) {
-        Device.findOne( {
-            ip: ip
-        },'-_id -__v',function ( err, device ) {
-            if ( err ) {
-                console.error("Database error in Device.js");
-            } else {
-                cb( device );
-            }
-        } );
-    }
-
-
-	function purge(){
-		console.error("Database error in Device.js");
-		Device.remove({}, function(err){
-			if(err){
-	        	console.error("Database error in Device.js");
+				
+				if(device.hasOwnProperty("hostname")){
+					d.hostname = device.hostname;
+				}
+				
+				var found = false;
+				for(var k in d.proximagicnodes){
+					if(d.proximagicnodes[k].mac === proximagicnode.mac){
+						found = true;
+						d.proximagicnodes[k].signal = device.signal;
+					}
+				}
+				
+				if(!found){
+					d.proximagicnodes.push({mac:proximagicnode.mac, name:proximagicnode.mac, signal:device.signal});
+				}
+				d.lastSeen = Date.now();
+				d.save( (err) => {
+					if(err){
+						console.log(err);
+						console.log("Error in device.js update save");
+					}
+				});
 			}
 		});
-
-		DeviceLog.remove({}, function(err){
+    }
+	
+	function findAll(callback){
+		Device.find({}, { '_id':0, '__v':0 }, (err, devices) => {
 			if(err){
-	        	console.error("Database error in Device.js");
+				callback({"error": "Device.findAll()"});
+			} else if (!devices){
+				callback({});
+			} else {
+				callback(devices)
+			}
+		});	
+	}
+	
+	function findThis(ip, agent, callback){
+		Device.findOne({ip:ip},{ '_id':0, '__v':0 },(err, d) => {
+			if(err){
+				callback({"error": "Device.findAll()"});
+			} else if (!d){
+				callback({});
+			} else {
+				
+				d.userAgent = agent;
+				d.save((err)=> {
+					if(err){
+						console.log("Error: device.js findThis save");
+					}
+				});
+				
+				var closestSignal = -100;
+				var closestProximagicnode = null;
+				for(var k in d.proximagicnodes){
+					let node = d.proximagicnodes[k];
+					if(node.signal && node.signal < 0 &&node.signal > closestSignal){
+						closestSignal = node.signal;
+						closestProximagicnode = node;
+					}
+				}
+				d = d.toJSON();
+				d.closestProximagicnode = closestProximagicnode;
+				console.log(d);
+				callback(d);
 			}
 		});
 	}
 
     return Object.freeze( {
-        upsert,
-        remove,
-        getWithMac,
-        getWithIP,
-        getAll,
-		purge,
-		cleanup
+		findThis,
+		findAll,
+        upsert
     } );
 
 }() );

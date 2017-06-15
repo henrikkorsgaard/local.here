@@ -1,13 +1,17 @@
 'use strict';
 
+let Device = require( './models/device.js' );
+let Proximagicnode = require( './models/proximagicnode.js' );
+
 let api = {
     "^\/devices$": {
         func: (q, r) => {
             if(q.method === "GET") {
-                console.log("DEVICES GET!");
-
+				Device.findAll((response)=>{
+					api.apiResponse(r, response);
+				});
             } else {
-                unsupportedMethod(q, r);
+                api.unsupportedMethod(q, r);
             }
         }
     },
@@ -17,36 +21,52 @@ let api = {
                 console.log("TOKEN GET!");
 
             } else {
-                unsupportedMethod(q, r);
+                api.unsupportedMethod(q, r);
             }
         }
     },
     "^\/this$": {
         func: (q, r) => {
             if(q.method === "GET") {
-                console.log("THIS GET!");
+				let ip = r.connection.remoteAddress;
+				let agent = q.headers['user-agent'];
+				
+                Device.findThis(ip,agent, (d) =>{
+                	api.apiResponse(r, d);
+                });
 
             } else {
-                unsupportedMethod(q, r);
+                api.unsupportedMethod(q, r);
             }
         }
     },
     "^\/proximagicnode$": {
         func: (q, r) => {
             if(q.method === "GET") {
-                console.log("proximagicnode GET!");
+				Proximagicnode.findAll((response)=>{
+					api.apiResponse(r, response);
+				});
             } else if (q.method === "POST"){
-                console.log("proximagicnode POST!");
                 api.apiResponse(r, {
                     status: 'ok'
                 });
+				
+				let data = '';
+				q.on( 'data', function ( chunk ) {
+					data += chunk.toString();
+				} );
+				
+				q.on( 'end', function () {
+					Proximagicnode.upsert(JSON.parse(data));
+				} );
+                
             } else {
-                unsupportedMethod(q, r);
+                api.unsupportedMethod(q, r);
             }
         }
     },
     unsupportedMethod: (q, r) => {
-        apiResponse(r, {
+        api.apiResponse(r, {
             status: 'error',
             response: 'This API request does not support method '+q.method
         });
