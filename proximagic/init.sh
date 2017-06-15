@@ -4,7 +4,6 @@ start(){
 	
 	echo "" > /home/pi/log
 	
-	cd /home/pi/proximagicYFI
 	if [[ ! -f /boot/proximagic.config ]] ; then
 		cp proximagic.config.template /boot/proximagic.config
 		echo "Please configure proximagic via the config file in /boot/"
@@ -39,8 +38,21 @@ start(){
 	ip=`ifconfig wlan0 | grep "inet addr" | awk 'sub(/addr:/, ""){print $2}'`
 	station=${ip%.*}'.0'
 	mac=`cat /sys/class/net/wlan0/address`
+
+	echo '<?xml version="1.0" encoding="UTF-8" ?>' > settings.xml
+	echo '<proximagicnode>' >> settings.xml
+	echo '<debug>false</debug>' >> settings.xml
+	echo '<stationname>'$name'</stationname>' >> settings.xml
+	echo '<stationmac>'$mac'</stationmac>' >> settings.xml
+	echo '<stationip>'$ip'</stationip>' >> settings.xml
+	echo '<horst host="localhost" port="4260" channel="6" />' >> settings.xml
+	echo '<nmap target="192.168.1.0/24" interval="10000" />' >> settings.xml
+	echo '<db sendUrl="http://api.here/devices" sendTimer="2000" uniqueId="3966383664303831383834633764363539613266656161306335356164303135" />' >> settings.xml
+	echo '<filter><bssid enabled="false">00:00:00:00:00:00</bssid><essid enabled="true">HERE</essid></filter>' >> settings.xml
+	echo '</proximagicnode>' >> settings.xml
 	
-	echo "test" > ./testSettings.xml
+	sudo horst -i wlan0 -N -p 4260 &>/dev/null &
+	sudo java -jar ProxiMagicNode.jar &> /dev/null &
 }
 	
 	
@@ -50,7 +62,6 @@ start(){
 stop(){
 	echo "Stopping!"
 	sudo pkill -9 java
-	sudo pkill -9 proximagic
 	sudo pkill -9 horst
 }
 
