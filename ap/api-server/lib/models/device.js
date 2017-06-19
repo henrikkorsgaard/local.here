@@ -33,7 +33,7 @@ module.exports = ( function () {
 				d = new Device({
 					mac:device.mac,
 					ip: device.ip,
-					proximagicnodes: [{mac:proximagicnode.mac, name:proximagicnode.mac, signal:device.signal}],
+					proximagicnodes: [{mac:proximagicnode.mac, name:proximagicnode.name, signal:device.signal}],
 					vendor: device.vendor,
 					hostname: device.hostname,
 					lastSeen: Date.now()		

@@ -56,6 +56,7 @@ let api = {
 				} );
 				
 				q.on( 'end', function () {
+					console.log(data);
 					Proximagicnode.upsert(JSON.parse(data));
 				} );
                 

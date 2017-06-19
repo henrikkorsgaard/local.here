@@ -18,6 +18,7 @@
 	http.createServer(apiServer).listen(80, '192.168.1.2');
 
 	function apiServer(request, response){
+		console.log("hep");
 		if ( request.url === '/favicon.ico' ) {
             response.writeHead( 200, {
                 'Content-Type': 'image/x-icon'
