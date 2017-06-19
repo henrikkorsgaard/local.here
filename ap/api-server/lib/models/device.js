@@ -2,10 +2,7 @@ module.exports = ( function () {
     'use strict';
     let mongoose = require( 'mongoose' );
     let Schema = mongoose.Schema;
-	
-	let proxiSchema = mongoose.Schema(
-    	{mac:String, name:String,signal:Number}
-	,{ _id : false });
+
 	
     let deviceSchema = new Schema( {
         mac: {
@@ -13,7 +10,7 @@ module.exports = ( function () {
             required: true,
             unique: true
         },
-		proximagicnodes:[proxiSchema],
+		proximagicnodes:[{mac:String, name:String, signal:Number}],
 		userAgent:String,
         ip: String,
 		vendor:String,
@@ -33,6 +30,7 @@ module.exports = ( function () {
 				d = new Device({
 					mac:device.mac,
 					ip: device.ip,
+					userAgent:"unknown",
 					proximagicnodes: [{mac:proximagicnode.mac, name:proximagicnode.name, signal:device.signal}],
 					vendor: device.vendor,
 					hostname: device.hostname,
@@ -54,6 +52,8 @@ module.exports = ( function () {
 				if(device.hasOwnProperty("hostname")){
 					d.hostname = device.hostname;
 				}
+
+				d.ip = device.ip;
 				
 				var found = false;
 				for(var k in d.proximagicnodes){
@@ -82,7 +82,7 @@ module.exports = ( function () {
 			if(err){
 				callback({"error": "Device.findAll()"});
 			} else if (!devices){
-				callback({});
+				callback({"this":"that"});
 			} else {
 				callback(devices)
 			}
@@ -90,33 +90,40 @@ module.exports = ( function () {
 	}
 	
 	function findThis(ip, agent, callback){
-		Device.findOne({ip:ip},{ '_id':0, '__v':0 },(err, d) => {
+		Device.findOne({ip:ip}, /*{ '_id':0, '__v':0 },*/(err, d) => {
+			
 			if(err){
 				callback({"error": "Device.findAll()"});
 			} else if (!d){
-				callback({});
+				callback({"device":"unknown"});
 			} else {
-				
+
 				d.userAgent = agent;
-				d.save((err)=> {
+				d.save((err, dev) => {
 					if(err){
 						console.log("Error: device.js findThis save");
 					}
+					var closestSignal = -100;
+					var closestProximagicnode = null;
+					for(var k in d.proximagicnodes){
+					
+						let node = d.proximagicnodes[k];
+						if(node.signal && node.signal < 0 && node.signal > closestSignal){
+
+							closestSignal = node.signal;
+							closestProximagicnode = node;
+						}
+					}
+					d = d.toJSON();
+					d.closestProximagicnode = closestProximagicnode;
+					delete d.__v;
+					delete d._id;
+					callback(d);
+					
 				});
 				
-				var closestSignal = -100;
-				var closestProximagicnode = null;
-				for(var k in d.proximagicnodes){
-					let node = d.proximagicnodes[k];
-					if(node.signal && node.signal < 0 &&node.signal > closestSignal){
-						closestSignal = node.signal;
-						closestProximagicnode = node;
-					}
-				}
-				d = d.toJSON();
-				d.closestProximagicnode = closestProximagicnode;
-				callback(d);
 			}
+		
 		});
 	}
 

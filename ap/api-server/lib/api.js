@@ -56,7 +56,6 @@ let api = {
 				} );
 				
 				q.on( 'end', function () {
-					console.log(data);
 					Proximagicnode.upsert(JSON.parse(data));
 				} );
                 
@@ -78,7 +77,6 @@ let api = {
         	'Access-Control-Allow-Origin': '*'
         } );
        
-
         r.write( JSON.stringify( msg ) );
         r.end();
     }

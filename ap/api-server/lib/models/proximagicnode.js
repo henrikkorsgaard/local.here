@@ -22,7 +22,6 @@ module.exports = ( function () {
 
     function upsert( pn ) {
 		let node = pn.proximagicnode;
-		console.log(node.name);
 		let devices = pn.devices;
 		
 		Proximagicnode.findOne({mac: node.mac}, (err, n)=>{
@@ -53,7 +52,6 @@ module.exports = ( function () {
 					}
 				})
 			} else {
-				console.log(n.name);
 				//TODO update node
 				for(var i = 0; i < devices.length; i++){
 					if(devices[i].ip !== '0.0.0.0'){
