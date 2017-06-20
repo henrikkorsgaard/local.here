@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <proximagicnode>
 <debug>false</debug>
-<stationname>Nygaard298</stationname>
-<stationmac>c4:a8:1d:e0:c7:85</stationmac>
-<stationip>192.168.1.23</stationip>
+<stationname>alice-office</stationname>
+<stationmac>c4:a8:1d:e0:d0:80</stationmac>
+<stationip>192.168.1.169</stationip>
 <horst host="localhost" port="4260" channel="6" />
 <nmap target="192.168.1.0/24" interval="10000" />
-<db sendUrl="http://api.here/devices" sendTimer="2000" uniqueId="3966383664303831383834633764363539613266656161306335356164303135" />
+<db sendUrl="http://api.here/proximagicnode" sendTimer="5000" uniqueId="3966383664303831383834633764363539613266656161306335356164303135" />
 <filter><bssid enabled="false">00:00:00:00:00:00</bssid><essid enabled="true">HERE</essid></filter>
 </proximagicnode>

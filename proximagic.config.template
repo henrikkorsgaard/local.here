@@ -1,15 +1,70 @@
-# Configuration file for proximagicYFI.
-# Config file in /boot will be selected over config file in /webstrate-pi
-
+######
+#
+# Configuration file for Local.here 2.0
+# This configuration file was generated from the proximagic.config.template in local.here
 # Uncomment and save with correct values.
+#
+######
 
+######
+#
 # Name of the proximagic node.
-name=
+# This will be the web-page the node will be associated with
+# Chose a meaningful name that is associated with the particular locale
+# you are instrumenting with the node.
+#
+# The name will be the hostname of the device on the WLAN.
+# Try to avoid conflicting names.
+#
+#####
 
-# Service configuration
-# API server port
-port=
+#name=
 
-# WLAN configuration
-ssid=
-password=
+#####
+#
+# WLAN connection
+# Note: if you are using an open network, then the password should be left empty.
+#
+#####
+
+#ssid=
+#password=
+
+#####
+#
+# Context-server configuration
+#
+# Uncomment and set to true if this node should run as context server
+#
+# Note: Raspberry PI 2/Zero are not powerful enough to run both as a scanner and context server
+#
+#####
+
+#context_server=true
+
+#####
+#
+# Proximagic configuration
+# The following configurations apply for the the proximagic scanner
+# Make sure that the device is equipped with a wirelss interface that 
+# is capable of running monitor-mode
+#
+# If this node should not act as a proximagic sensing node,
+# then leave the settings uncommented
+#
+# Note: The onboard WiFi chip on Raspberry PI 3/Zero (rv.2) does not 
+# support monitor mode out of the box.
+#
+# Note: api_server is the server the proximagic node sends device information
+# Default is http://api.here
+#
+# Note:interval is milliseconds between proximity scans. Do not go below 5000 to avoid network throttling
+#
+# Note: in the current version threshold is not activated
+#
+#####
+
+#proximagic=true
+#interval=5000
+#api_server=http://api.here
+#threshold=-10

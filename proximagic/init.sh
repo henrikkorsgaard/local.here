@@ -1,9 +1,9 @@
 #!/bin/bash
 
 start(){
-	
+
 	echo "" > /home/pi/log
-	
+
 	if [[ ! -f /boot/proximagic.config ]] ; then
 		cp proximagic.config.template /boot/proximagic.config
 		echo "Please configure proximagic via the config file in /boot/"
@@ -47,17 +47,14 @@ start(){
 	echo '<stationip>'$ip'</stationip>' >> settings.xml
 	echo '<horst host="localhost" port="4260" channel="6" />' >> settings.xml
 	echo '<nmap target="192.168.1.0/24" interval="10000" />' >> settings.xml
-	echo '<db sendUrl="http://api.here/devices" sendTimer="2000" uniqueId="3966383664303831383834633764363539613266656161306335356164303135" />' >> settings.xml
+	echo '<db sendUrl="'$context-server'" sendTimer="2000" uniqueId="3966383664303831383834633764363539613266656161306335356164303135" />' >> settings.xml
 	echo '<filter><bssid enabled="false">00:00:00:00:00:00</bssid><essid enabled="true">HERE</essid></filter>' >> settings.xml
 	echo '</proximagicnode>' >> settings.xml
-	
-	sudo horst -i wlan0 -N -p 4260 &>/dev/null &
-	sudo java -jar ProxiMagicNode.jar &> /dev/null &
+
+	#sudo horst -i wlan0 -N -p 4260 &>/dev/null &
+	#sudo java -jar ProxiMagicNode.jar &> /dev/null &
 }
-	
-	
-	
-	
+
 
 stop(){
 	echo "Stopping!"
