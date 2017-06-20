@@ -10,8 +10,8 @@ module.exports = ( function () {
             required: true,
             unique: true
         },
-		proximagicnodes:[{mac:String, name:String, signal:Number}],
-		userAgent:String,
+		locales:[{mac:String, name:String, signal:Number}],
+		useragent:String,
         ip: String,
 		vendor:String,
         hostname: String,
@@ -30,8 +30,8 @@ module.exports = ( function () {
 				d = new Device({
 					mac:device.mac,
 					ip: device.ip,
-					userAgent:"unknown",
-					proximagicnodes: [{mac:proximagicnode.mac, name:proximagicnode.name, signal:device.signal}],
+					agent:"unknown",
+					locales: [{mac:proximagicnode.mac, name:proximagicnode.locale, signal:device.signal}],
 					vendor: device.vendor,
 					hostname: device.hostname,
 					lastSeen: Date.now()		
@@ -64,7 +64,7 @@ module.exports = ( function () {
 				}
 				
 				if(!found){
-					d.proximagicnodes.push({mac:proximagicnode.mac, name:proximagicnode.mac, signal:device.signal});
+					d.proximagicnodes.push({mac:proximagicnode.mac, name:proximagicnode.locale, signal:device.signal});
 				}
 				d.lastSeen = Date.now();
 				d.save( (err) => {
@@ -90,7 +90,7 @@ module.exports = ( function () {
 	}
 	
 	function findThis(ip, agent, callback){
-		Device.findOne({ip:ip}, /*{ '_id':0, '__v':0 },*/(err, d) => {
+		Device.findOne({ip:ip}, { '_id':0, '__v':0 },(err, d) => {
 			
 			if(err){
 				callback({"error": "Device.findAll()"});
@@ -104,18 +104,18 @@ module.exports = ( function () {
 						console.log("Error: device.js findThis save");
 					}
 					var closestSignal = -100;
-					var closestProximagicnode = null;
+					var closestLocale = null;
 					for(var k in d.proximagicnodes){
 					
 						let node = d.proximagicnodes[k];
 						if(node.signal && node.signal < 0 && node.signal > closestSignal){
 
 							closestSignal = node.signal;
-							closestProximagicnode = node;
+							closestLocale = node;
 						}
 					}
 					d = d.toJSON();
-					d.closestProximagicnode = closestProximagicnode;
+					d.closestLocale = closestLocale;
 					delete d.__v;
 					delete d._id;
 					callback(d);

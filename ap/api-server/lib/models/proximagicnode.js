@@ -11,7 +11,7 @@ module.exports = ( function () {
             unique: true
         },
         ip: String,
-		name: String,
+		locale: String,
         updatedAt: {
             type: Date,
             default: Date.now
@@ -21,6 +21,7 @@ module.exports = ( function () {
     let Proximagicnode = mongoose.model( 'Proximagicnode', proximagicNodeSchema );
 
     function upsert( pn ) {
+		console.log(pn)
 		let node = pn.proximagicnode;
 		let devices = pn.devices;
 		
@@ -33,7 +34,7 @@ module.exports = ( function () {
 				let proximagicnode = new Proximagicnode({
 					mac:node.mac,
 					ip:node.ip,
-					name:node.name,
+					locale:node.locale,
 				});
 				
 				proximagicnode.save((err)=>{

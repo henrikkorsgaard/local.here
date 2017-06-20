@@ -19,39 +19,49 @@ start(){
 
 	source /boot/proximagic.config
 
-	if [[ -z $locale || -z $ssid || -z $password ]]; then
-		echo_time "Incorrect configuration file /boot/proximagic.config" >> ${LOGFILE}
-		exit
-	fi
-
-	if [ -z "$(hostname | grep ^$name)" ]; then
-		echo_time "Changing hostname and restaring network service" >> ${LOGFILE}
-		printf $locale > /etc/hostname
-		printf "127.0.0.1\tlocalhost\n" > /etc/hosts
-		printf "127.0.0.1\t$name" >> /etc/hosts
-		hostname $locale
-		sleep 1
-	fi
-
-	sudo wpa_passphrase $ssid $password > /etc/wpa_supplicant/wpa_supplicant.conf
-	sudo systemctl start networking.service &
-	sleep 1
-
-	while [ `ifconfig wlan0 | grep -q "inet addr" ; echo $?` == 1 ]; do
-		echo_time "waiting for IP on wlan0" >> ${LOGFILE}
-		sleep 2
-	done
-
-	ip=`ifconfig wlan0 | grep "inet addr" | awk 'sub(/addr:/, ""){print $2}'`
-	station=${ip%.*}'.0'
-	mac=`cat /sys/class/net/wlan0/address`
-
 	if [[ $context_server = true ]]; then
 		echo_time "Setting up as api server for proximagic nodes" >> ${LOGFILE}
-		#TODO
+		
+		# Setup mongodb in ram
+		if [ ! -d /ramdata ] ; then
+			sudo mkdir /ramdata
+		fi
+  	
+		sudo mount -t tmpfs -o size=64M tmpfs /ramdata/
+		sudo systemctl start mongodb
+
+		sudo nodejs /home/pi/local.here/ap/api-server/api-server.js 1>/dev/null 2> ${LOGFILE} &
 	fi
 
 	if [[ $proximagic = true ]]; then
+		
+		if [[ -z $locale || -z $ssid || -z $password ]]; then
+			echo_time "Incorrect configuration file /boot/proximagic.config" >> ${LOGFILE}
+			exit
+		fi
+
+		if [ -z "$(hostname | grep ^$name)" ]; then
+			echo_time "Changing hostname and restaring network service" >> ${LOGFILE}
+			printf $locale > /etc/hostname
+			printf "127.0.0.1\tlocalhost\n" > /etc/hosts
+			printf "127.0.0.1\t$name" >> /etc/hosts
+			hostname $locale
+			sleep 1
+		fi
+
+		sudo wpa_passphrase $ssid $password > /etc/wpa_supplicant/wpa_supplicant.conf
+		sudo systemctl start networking.service &
+		sleep 1
+
+		while [ `ifconfig wlan0 | grep -q "inet addr" ; echo $?` == 1 ]; do
+			echo_time "waiting for IP on wlan0" >> ${LOGFILE}
+			sleep 2
+		done
+
+		ip=`ifconfig wlan0 | grep "inet addr" | awk 'sub(/addr:/, ""){print $2}'`
+		station=${ip%.*}'.0'
+		mac=`cat /sys/class/net/wlan0/address`
+		
 		echo_time "Setting up as proximagic node" >> ${LOGFILE}
 		cd /home/pi/local.here/proximagic
 		echo '<?xml version="1.0" encoding="UTF-8" ?>' > settings.xml

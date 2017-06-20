@@ -3,20 +3,12 @@
 	'use strict';
 	
 	process.title = 'proximagic-api-server';
-	
+	let Proximagicnode = require( './lib/models/proximagicnode.js' );
 	var http = require( 'http' );
 	var api = require( './lib/api.js' ).api;
-	/*
+	
 	var mongo = require( 'mongoose' );
 	mongo.connect( 'mongodb://localhost/proximagic' );
-	
-
-	//TODO: get local ip
-	//TODO: create api server
-	//TODO: token (get/post)
-	//TODO: proximitynode (get/post)
-	//TODO: devices (get)
-	//TODO: this (get)
 
 	http.createServer(apiServer).listen(80, '192.168.1.2');
 
@@ -30,7 +22,7 @@
         }
 		
 		if(request.method === "POST"){
-			//askAccessPoint();
+			askAccessPoint();
 		}
 		
 		var match = false;
@@ -47,10 +39,10 @@
 			api.apiResponse( response, {
 				status: 'error',
 				response: 'Unknown proximagic API request'
-			} );
+			} );z
 		}
 	}
-	*/
+	
 	askAccessPoint();
 	
 	function askAccessPoint(){
@@ -58,16 +50,16 @@
 			let data = "";
 			response.on("data", (d)=>{
 				data += d;
-				
 			});
-			
 			response.on("end", (e)=>{
-				console.log(data);
 				try {
-					
+					let js = JSON.parse(data);
+					let obj = {};
+					obj.proximagicnode = {mac:js.mac,locale:js.locale, ip:js.ip};
+					obj.devices = js.devices;
+					Proximagicnode.upsert(obj);
 				} catch(e){
-					
-					
+					console.log(e);
 				}
 			})
 			
