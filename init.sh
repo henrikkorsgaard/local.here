@@ -19,17 +19,17 @@ start(){
 
 	source /boot/proximagic.config
 
-	if [[ -z $name || -z $ssid || -z $password ]]; then
+	if [[ -z $locale || -z $ssid || -z $password ]]; then
 		echo_time "Incorrect configuration file /boot/proximagic.config" >> ${LOGFILE}
 		exit
 	fi
 
 	if [ -z "$(hostname | grep ^$name)" ]; then
 		echo_time "Changing hostname and restaring network service" >> ${LOGFILE}
-		printf $name > /etc/hostname
+		printf $locale > /etc/hostname
 		printf "127.0.0.1\tlocalhost\n" > /etc/hosts
 		printf "127.0.0.1\t$name" >> /etc/hosts
-		hostname $name
+		hostname $locale
 		sleep 1
 	fi
 
@@ -57,9 +57,9 @@ start(){
 		echo '<?xml version="1.0" encoding="UTF-8" ?>' > settings.xml
         echo '<proximagicnode>' >> settings.xml
         echo '<debug>false</debug>' >> settings.xml
-        echo '<stationname>'$name'</stationname>' >> settings.xml
-        echo '<stationmac>'$mac'</stationmac>' >> settings.xml
-        echo '<stationip>'$ip'</stationip>' >> settings.xml
+        echo '<locale>'$locale'</locale>' >> settings.xml
+        echo '<mac>'$mac'</mac>' >> settings.xml
+        echo '<ip>'$ip'</ip>' >> settings.xml
         echo '<horst host="localhost" port="4260" channel="6" />' >> settings.xml
         echo '<nmap target="192.168.1.0/24" interval="10000" />' >> settings.xml
         echo '<db sendUrl="'$api_server'/proximagicnode" sendTimer="'$interval'" uniqueId="3966383664303831383834633764363539613266656161306335356164303135" />' >> settings.xml

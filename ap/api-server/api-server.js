@@ -1,9 +1,12 @@
 /*global console, process, require*/
 ( function () {
 	'use strict';
+	
 	process.title = 'proximagic-api-server';
+	
 	var http = require( 'http' );
 	var api = require( './lib/api.js' ).api;
+	/*
 	var mongo = require( 'mongoose' );
 	mongo.connect( 'mongodb://localhost/proximagic' );
 	
@@ -26,6 +29,10 @@
 			return;
         }
 		
+		if(request.method === "POST"){
+			//askAccessPoint();
+		}
+		
 		var match = false;
 		for ( var obj in api ) {
 			var re = new RegExp( obj );
@@ -42,5 +49,28 @@
 				response: 'Unknown proximagic API request'
 			} );
 		}
+	}
+	*/
+	askAccessPoint();
+	
+	function askAccessPoint(){
+		http.get("http://ap.here", (response)=>{
+			let data = "";
+			response.on("data", (d)=>{
+				data += d;
+				
+			});
+			
+			response.on("end", (e)=>{
+				console.log(data);
+				try {
+					
+				} catch(e){
+					
+					
+				}
+			})
+			
+		});
 	}
 }() );

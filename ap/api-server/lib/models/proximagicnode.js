@@ -35,12 +35,6 @@ module.exports = ( function () {
 					ip:node.ip,
 					name:node.name,
 				});
-				/*
-				for(var i = 0; i < devices.length; i++){
-					if(devices[i].ip !== '0.0.0.0'){
-						device.upsert(devices[i], proximagicnode);
-					}
-				}*/
 				
 				proximagicnode.save((err)=>{
 					if(err){
