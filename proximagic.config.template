@@ -8,7 +8,7 @@
 
 ######
 #
-# Locale where the proximagic node is installed.
+# Location where the proximagic node is installed.
 # This will be the web-page the node will be associated with
 # Chose a meaningful name that is associated with the particular locale
 # you are instrumenting with the node.
@@ -18,7 +18,7 @@
 #
 #####
 
-#locale=
+#location=
 
 #####
 #

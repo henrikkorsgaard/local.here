@@ -10,7 +10,7 @@ module.exports = ( function () {
             required: true,
             unique: true
         },
-		locales:[{mac:String, name:String, signal:Number}],
+		locations:[{mac:String, name:String, signal:Number}],
 		useragent:String,
         ip: String,
 		vendor:String,
@@ -25,13 +25,12 @@ module.exports = ( function () {
 			if(err){
 				console.log("Error: device.js find!");
 			}
-			
 			if(!d){
 				d = new Device({
 					mac:device.mac,
 					ip: device.ip,
 					agent:"unknown",
-					locales: [{mac:proximagicnode.mac, name:proximagicnode.locale, signal:device.signal}],
+					locations: [{mac:proximagicnode.mac, name:proximagicnode.location, signal:device.signal}],
 					vendor: device.vendor,
 					hostname: device.hostname,
 					lastSeen: Date.now()		
@@ -40,11 +39,12 @@ module.exports = ( function () {
 				d.save( (err) => {
 					if(err){
 						console.log(err);
-						console.log("Error in device.js insert save");
+						console.log("Emorror in device.js insert save");
 					}
 				});
 				
 			} else {
+
 				if(device.hasOwnProperty("vendor")){
 					d.vendor = device.vendor;
 				}
@@ -56,15 +56,15 @@ module.exports = ( function () {
 				d.ip = device.ip;
 				
 				var found = false;
-				for(var k in d.proximagicnodes){
-					if(d.proximagicnodes[k].mac === proximagicnode.mac){
+				for(var k in d.locations){
+					if(d.locations[k].mac === device.mac){
 						found = true;
-						d.proximagicnodes[k].signal = device.signal;
+						d.locations[k].signal = device.signal;
 					}
 				}
 				
 				if(!found){
-					d.proximagicnodes.push({mac:proximagicnode.mac, name:proximagicnode.locale, signal:device.signal});
+					d.locations.push({mac:proximagicnode.mac, location:proximagicnode.location, signal:device.signal});
 				}
 				d.lastSeen = Date.now();
 				d.save( (err) => {
@@ -104,18 +104,18 @@ module.exports = ( function () {
 						console.log("Error: device.js findThis save");
 					}
 					var closestSignal = -100;
-					var closestLocale = null;
+					var closestLocation = null;
 					for(var k in d.proximagicnodes){
 					
 						let node = d.proximagicnodes[k];
 						if(node.signal && node.signal < 0 && node.signal > closestSignal){
 
 							closestSignal = node.signal;
-							closestLocale = node;
+							closestLocation = node;
 						}
 					}
 					d = d.toJSON();
-					d.closestLocale = closestLocale;
+					d.closestLocation = closestLocation;
 					delete d.__v;
 					delete d._id;
 					callback(d);

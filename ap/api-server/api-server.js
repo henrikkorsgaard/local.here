@@ -21,9 +21,6 @@
 			return;
         }
 		
-		if(request.method === "POST"){
-			askAccessPoint();
-		}
 		
 		var match = false;
 		for ( var obj in api ) {
@@ -43,7 +40,10 @@
 		}
 	}
 	
-	askAccessPoint();
+	
+	////TODO: DO SOMETHING ON A TICK: CLEAR + ASKACCESSPOINT!
+	
+	//askAccessPoint();
 	
 	function askAccessPoint(){
 		http.get("http://ap.here", (response)=>{
@@ -59,6 +59,7 @@
 					obj.devices = js.devices;
 					Proximagicnode.upsert(obj);
 				} catch(e){
+					console.log("whaat")
 					console.log(e);
 				}
 			})

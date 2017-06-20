@@ -35,17 +35,17 @@ start(){
 
 	if [[ $proximagic = true ]]; then
 		
-		if [[ -z $locale || -z $ssid || -z $password ]]; then
+		if [[ -z $location || -z $ssid || -z $password ]]; then
 			echo_time "Incorrect configuration file /boot/proximagic.config" >> ${LOGFILE}
 			exit
 		fi
 
 		if [ -z "$(hostname | grep ^$name)" ]; then
 			echo_time "Changing hostname and restaring network service" >> ${LOGFILE}
-			printf $locale > /etc/hostname
+			printf $location > /etc/hostname
 			printf "127.0.0.1\tlocalhost\n" > /etc/hosts
 			printf "127.0.0.1\t$name" >> /etc/hosts
-			hostname $locale
+			hostname $location
 			sleep 1
 		fi
 
@@ -67,7 +67,7 @@ start(){
 		echo '<?xml version="1.0" encoding="UTF-8" ?>' > settings.xml
         echo '<proximagicnode>' >> settings.xml
         echo '<debug>false</debug>' >> settings.xml
-        echo '<locale>'$locale'</locale>' >> settings.xml
+        echo '<location>'$location'</location>' >> settings.xml
         echo '<mac>'$mac'</mac>' >> settings.xml
         echo '<ip>'$ip'</ip>' >> settings.xml
         echo '<horst host="localhost" port="4260" channel="6" />' >> settings.xml
