@@ -17,11 +17,24 @@ module.exports = ( function () {
 
     let Location = mongoose.model( 'Location', LocationSchema );
 	
-	let ws;
+	let connections = [];
 	
-	function setWebsocketConnection(connection){
-		ws = connection;
+	function addWebSocketConnection(ws){
+		connections.push(ws);
 	}
+	
+	function removeWebSocketConnection(ws){
+		connections.splice(connections.indexOf(ws), 1);
+	}
+	
+	function webSocketSend(msg){
+		connections.forEach((ws)=>{
+			if(ws.readyState === 1){
+				ws.send(JSON.stringify(msg));
+			}
+		});
+	}
+		
 
     function upsert( node ) {
 
@@ -42,7 +55,7 @@ module.exports = ( function () {
 				
 				location.save((err, n)=>{
 					if(err){
-						console.log(err);
+						console.log(err.code);
 						console.log("Error in location.js upsert save");
 					}
 					
@@ -78,14 +91,26 @@ module.exports = ( function () {
 		});
 	}
 	
-	function findByName(name, callback){
-		Location.findOne({location:name}, { '_id':0, '__v':0 }, (err, n) => {
+	function findByMac(mac, callback){
+		Location.findOne({mac:mac}, { '_id':0, '__v':0 }, (err, node) => {
 			if(err){
 				callback({"error": "Device.findByName()"});
-			} else if (!n){
-				callback({"node":"unknown"});
+			} else if (!node){
+				callback({"location":"unknown"});
 			} else {
-				callback(n)
+				callback(node)
+			}
+		});
+	}
+	
+	function findByName(name, callback){
+		Location.find({location:name}, { '_id':0, '__v':0 }, (err, nodes) => {
+			if(err){
+				callback({"error": "Device.findByName()"});
+			} else if (!nodes){
+				callback({"location":"unknown"});
+			} else {
+				callback(nodes)
 			}
 		});
 	}
@@ -101,10 +126,7 @@ module.exports = ( function () {
 			for(var i = 0; i < locations.length;i++){
 				let location = locations[i];
 				let last = new Date(location.seen).getTime();
-				if(last < expire){
-					console.log("Removing location: "+location.location);
-					if()
-					
+				if(last < expire){					
 					Location.remove({mac:location.mac}, (err, d)=>{
 						if(err){console.log(err.code);}
 					});
@@ -119,7 +141,9 @@ module.exports = ( function () {
 		findAll,
         upsert,
 		findByName,
-		setWebsocketConnection
+		findByMac,
+		addWebSocketConnection,
+		removeWebSocketConnection
     } );
 
 }() );
