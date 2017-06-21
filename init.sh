@@ -40,7 +40,7 @@ start(){
 			exit
 		fi
 
-		if [ -z "$(hostname | grep ^$name)" ]; then
+		if [ -z "$(hostname | grep ^$location)" ]; then
 			echo_time "Changing hostname and restaring network service" >> ${LOGFILE}
 			printf $location > /etc/hostname
 			printf "127.0.0.1\tlocalhost\n" > /etc/hosts
