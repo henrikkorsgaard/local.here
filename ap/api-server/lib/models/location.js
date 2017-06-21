@@ -17,10 +17,10 @@ module.exports = ( function () {
 
     let Location = mongoose.model( 'Location', LocationSchema );
 	
-	let wsConnection;
+	let ws;
 	
 	function setWebsocketConnection(connection){
-		wsConnection = connection;
+		ws = connection;
 	}
 
     function upsert( node ) {
@@ -103,6 +103,8 @@ module.exports = ( function () {
 				let last = new Date(location.seen).getTime();
 				if(last < expire){
 					console.log("Removing location: "+location.location);
+					if()
+					
 					Location.remove({mac:location.mac}, (err, d)=>{
 						if(err){console.log(err.code);}
 					});

@@ -39,29 +39,6 @@ let api = {
             }
         }
     },
-    "^\/proximagicnode$": {
-        func: (q, r) => {
-            if (q.method === "POST"){
-				
-                api.apiResponse(r, {
-                    status: 'ok'
-                });
-				
-				let data = '';
-				q.on( 'data', function ( chunk ) {
-					data += chunk.toString();
-				} );
-				
-				q.on( 'end', function () {
-					
-					Location.upsert(JSON.parse(data));
-				} );
-                
-            } else {
-                api.unsupportedMethod(q, r);
-            }
-        }
-    },
     "^\/locations$": {
         func: (q, r) => {
             if(q.method === "GET") {
@@ -75,7 +52,21 @@ let api = {
     },
     "^\/location\/?": {
         func: (q, r) => {
-            if(q.method === "GET") {
+            if (q.method === "POST"){
+                api.apiResponse(r, {
+                    status: 'ok'
+                });
+				
+				let data = '';
+				q.on( 'data', function ( chunk ) {
+					data += chunk.toString();
+				} );
+				
+				q.on( 'end', function () {
+					
+					Location.upsert(JSON.parse(data));
+				} );
+            } else if(q.method === "GET") {
 				let fragments = q.url.split( '/' ).filter( Boolean );
 				Location.findByName(fragments[1], (response)=>{
 					api.apiResponse(r, response);

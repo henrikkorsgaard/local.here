@@ -19,10 +19,10 @@ module.exports = ( function () {
 	
     let Device = mongoose.model( 'Device', deviceSchema );
 	
-	let wsConnection;
+	let ws;
 	
 	function setWebsocketConnection(connection){
-		wsConnection = connection;
+		ws = connection;
 	}
 
     function upsert( device, node ) {
