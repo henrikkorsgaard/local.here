@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <proximagicnode>
 <debug>false</debug>
-<location>alice-office</location>
-<mac>c4:a8:1d:e0:d0:80</mac>
-<ip>192.168.1.169</ip>
+<location>bob-office</location>
+<mac>c4:a8:1d:e0:c7:85</mac>
+<ip>192.168.1.23</ip>
 <horst host="localhost" port="4260" channel="6" />
 <nmap target="192.168.1.0/24" interval="10000" />
 <db sendUrl="http://api.here/location" sendTimer="5000" uniqueId="3966383664303831383834633764363539613266656161306335356164303135" />
