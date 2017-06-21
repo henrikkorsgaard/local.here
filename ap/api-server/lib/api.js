@@ -41,11 +41,8 @@ let api = {
     },
     "^\/proximagicnode$": {
         func: (q, r) => {
-            if(q.method === "GET") {
-				Proximagicnode.findAll((response)=>{
-					api.apiResponse(r, response);
-				});
-            } else if (q.method === "POST"){
+            if (q.method === "POST"){
+				
                 api.apiResponse(r, {
                     status: 'ok'
                 });
@@ -56,6 +53,7 @@ let api = {
 				} );
 				
 				q.on( 'end', function () {
+					
 					Proximagicnode.upsert(JSON.parse(data));
 				} );
                 
@@ -64,6 +62,30 @@ let api = {
             }
         }
     },
+    "^\/locations$": {
+        func: (q, r) => {
+            if(q.method === "GET") {
+				Proximagicnode.findAll((response)=>{
+					api.apiResponse(r, response);
+				});
+            } else {
+                api.unsupportedMethod(q, r);
+            }
+        }
+    },
+    "^\/location\/?": {
+        func: (q, r) => {
+            if(q.method === "GET") {
+				let fragments = q.url.split( '/' ).filter( Boolean );
+				Proximagicnode.findByName(fragments[1], (response)=>{
+					api.apiResponse(r, response);
+				});
+				
+            } else {
+                api.unsupportedMethod(q, r);
+            }
+        }
+    },	
     unsupportedMethod: (q, r) => {
         api.apiResponse(r, {
             status: 'error',

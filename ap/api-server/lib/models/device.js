@@ -11,26 +11,58 @@ module.exports = ( function () {
             unique: true
         },
 		locations:[{mac:String, name:String, signal:Number}],
-		useragent:String,
+		agent:String,
         ip: String,
 		vendor:String,
         hostname: String,
-        lastSeen: Date
+		seen: Date
     } );
-
+	
     let Device = mongoose.model( 'Device', deviceSchema );
 
-    function upsert( device, proximagicnode ) {
+    function upsert( device, node ) {
+		
+		var conditions = {mac:device.mac};
+		
+		var update = { $set: {ip:device.ip, seen:Date.now()}, $addToSet: { locations: {mac:node.mac, location:node.location, signal:device.signal}}}
+		
+		if(device.hasOwnProperty("hostname") && device.hostname !== "unknown"){
+			update['$set'].hostname = device.hostname;
+		}
+		
+		if(device.hasOwnProperty("vendor") && device.hostname !== "Unknown"){
+			update['$set'].vendor = device.vendor;
+		}		
+		
+		var options = {upsert:true, new:true}
+		
+		Device.findOneAndUpdate(conditions, update, options, (err, d) => {
+			if(err){
+				console.log("Error in Device.findOneAndUpdate");
+				console.log(err);
+			} else {
+				console.log(d);
+			}
+			
+			
+		});
+	
+		
+		//{ $set: { name: 'jason borne' }}
+		
+		//
+		/*
 		Device.findOne({mac:device.mac}, (err, d) => {
 			if(err){
 				console.log("Error: device.js find!");
 			}
 			if(!d){
+				console.log("new device")
 				d = new Device({
 					mac:device.mac,
 					ip: device.ip,
 					agent:"unknown",
-					locations: [{mac:proximagicnode.mac, name:proximagicnode.location, signal:device.signal}],
+					locations: [{mac:node.mac, name:node.location, signal:device.signal}],
 					vendor: device.vendor,
 					hostname: device.hostname,
 					lastSeen: Date.now()		
@@ -57,14 +89,15 @@ module.exports = ( function () {
 				
 				var found = false;
 				for(var k in d.locations){
-					if(d.locations[k].mac === device.mac){
+					if(d.locations[k].mac === node.mac){
 						found = true;
 						d.locations[k].signal = device.signal;
 					}
 				}
 				
 				if(!found){
-					d.locations.push({mac:proximagicnode.mac, location:proximagicnode.location, signal:device.signal});
+					console.log("trying to push location")
+					d.locations.push({mac:node.mac, location:node.location, signal:device.signal});
 				}
 				d.lastSeen = Date.now();
 				d.save( (err) => {
@@ -74,7 +107,7 @@ module.exports = ( function () {
 					}
 				});
 			}
-		});
+		});*/
     }
 	
 	function findAll(callback){
@@ -98,16 +131,16 @@ module.exports = ( function () {
 				callback({"device":"unknown"});
 			} else {
 
-				d.userAgent = agent;
+				d.agent = agent;
 				d.save((err, dev) => {
 					if(err){
 						console.log("Error: device.js findThis save");
 					}
 					var closestSignal = -100;
 					var closestLocation = null;
-					for(var k in d.proximagicnodes){
+					for(var k in d.locations){
 					
-						let node = d.proximagicnodes[k];
+						let node = d.locations[k];
 						if(node.signal && node.signal < 0 && node.signal > closestSignal){
 
 							closestSignal = node.signal;
@@ -126,11 +159,31 @@ module.exports = ( function () {
 		
 		});
 	}
+	
+	function clean(){
+		
+		let cleanTime = Date.now() - 6000;
+		Device.find({}, (err, devices)=>{
+			if(err){
+				callback({"error": "Device.clean()"});
+			} else {
+				for(var i = 0; i < devices.length; i++){
+					let lastSeen = new Date(devices[i].lastSeen).getTime();
+					if(lastSeen < cleanTime){
+						Device.remove({mac:devices[i].mac}, (err, d)=>{
+						});
+					}	
+				}
+			}
+			
+		});
+	}
 
     return Object.freeze( {
 		findThis,
 		findAll,
-        upsert
+        upsert,
+		clean
     } );
 
 }() );
