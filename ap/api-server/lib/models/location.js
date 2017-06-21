@@ -16,6 +16,12 @@ module.exports = ( function () {
     } );
 
     let Location = mongoose.model( 'Location', LocationSchema );
+	
+	let wsConnection;
+	
+	function setWebsocketConnection(connection){
+		wsConnection = connection;
+	}
 
     function upsert( node ) {
 
@@ -110,7 +116,8 @@ module.exports = ( function () {
 		clean,
 		findAll,
         upsert,
-		findByName
+		findByName,
+		setWebsocketConnection
     } );
 
 }() );

@@ -18,6 +18,12 @@ module.exports = ( function () {
     } );
 	
     let Device = mongoose.model( 'Device', deviceSchema );
+	
+	let wsConnection;
+	
+	function setWebsocketConnection(connection){
+		wsConnection = connection;
+	}
 
     function upsert( device, node ) {
 
@@ -193,7 +199,8 @@ module.exports = ( function () {
 		findThis,
 		findAll,
         upsert,
-		clean
+		clean,
+		setWebsocketConnection
     } );
 
 }() );
