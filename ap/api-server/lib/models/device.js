@@ -2,7 +2,6 @@ module.exports = ( function () {
     'use strict';
     let mongoose = require( 'mongoose' );
     let Schema = mongoose.Schema;
-
 	
     let deviceSchema = new Schema( {
         mac: {
@@ -10,7 +9,7 @@ module.exports = ( function () {
             required: true,
             unique: true
         },
-		locations:[{mac:String, name:String, signal:Number}],
+		locations:[{mac:String, location:String, signal:Number, seen:Date}],
 		agent:String,
         ip: String,
 		vendor:String,
@@ -21,93 +20,103 @@ module.exports = ( function () {
     let Device = mongoose.model( 'Device', deviceSchema );
 
     function upsert( device, node ) {
+
 		
-		var conditions = {mac:device.mac};
+		let device_mac = device.mac.toLowerCase();
 		
-		var update = { $set: {ip:device.ip, seen:Date.now()}, $addToSet: { locations: {mac:node.mac, location:node.location, signal:device.signal}}}
-		
-		if(device.hasOwnProperty("hostname") && device.hostname !== "unknown"){
-			update['$set'].hostname = device.hostname;
-		}
-		
-		if(device.hasOwnProperty("vendor") && device.hostname !== "Unknown"){
-			update['$set'].vendor = device.vendor;
-		}		
-		
-		var options = {upsert:true, new:true}
-		
-		Device.findOneAndUpdate(conditions, update, options, (err, d) => {
+		Device.findOne({mac: device_mac}, (err, d) => {
+			
 			if(err){
-				console.log("Error in Device.findOneAndUpdate");
-				console.log(err);
-			} else {
-				console.log(d);
+				console.log("Error in Device.findOne();");
+				console.log(err)
 			}
 			
-			
-		});
-	
-		
-		//{ $set: { name: 'jason borne' }}
-		
-		//
-		/*
-		Device.findOne({mac:device.mac}, (err, d) => {
-			if(err){
-				console.log("Error: device.js find!");
-			}
-			if(!d){
-				console.log("new device")
+			else if(!d){
+				
+				let location = {mac:node.mac, ip:node.ip, location:node.location, seen:Date.now()};
+				if(device.signal && device.signal !== 'undefined' && device.signal !== 0 ){
+					location.signal = device.signal;
+				}
+				
 				d = new Device({
-					mac:device.mac,
-					ip: device.ip,
-					agent:"unknown",
-					locations: [{mac:node.mac, name:node.location, signal:device.signal}],
-					vendor: device.vendor,
-					hostname: device.hostname,
-					lastSeen: Date.now()		
+					mac: device_mac,
+					ip:device.ip,
+					seen:Date.now(),
+					locations:[location]
 				});
 				
-				d.save( (err) => {
+				if(device.hasOwnProperty("hostname") && device.hostname !== "unknown"){
+					d.hostname = device.hostname;
+				}
+				
+				if(device.hasOwnProperty("vendor") && device.vendor !== "Unknown"){
+					d.vendor = device.vendor;
+				}
+				d.save((err)=>{
 					if(err){
-						console.log(err);
-						console.log("Emorror in device.js insert save");
+						console.log("Error in Device.findOne() - d.save();");
+						console.log(err)
 					}
 				});
-				
-			} else {
 
-				if(device.hasOwnProperty("vendor")){
+			} else {
+				if(device.ip !== "0.0.0.0"){
+					d.ip = device.ip;
+				}
+
+				d.seen = Date.now();
+				
+				if(!d.hasOwnProperty("hostname") && device.hasOwnProperty("hostname") && device.hostname !== "unknown"){
+					d.hostname = device.hostname;
+				}
+				
+				if(!d.hasOwnProperty("vendor") && device.hasOwnProperty("vendor") && device.vendor !== "Unknown"){
 					d.vendor = device.vendor;
 				}
 				
-				if(device.hasOwnProperty("hostname")){
-					d.hostname = device.hostname;
-				}
-
-				d.ip = device.ip;
-				
 				var found = false;
-				for(var k in d.locations){
-					if(d.locations[k].mac === node.mac){
+				for(var i = 0; i < d.locations.length; i++){
+					var location = d.locations[i];
+					if(location.mac === node.mac){
+						if(device.signal && device.signal !== 'undefined' && device.signal !== 0 ){
+							if(node.location === "alice-office"){
+								console.log("setting signal");
+							}
+							location.signal = device.signal;
+						}
+						
+						location.seen = Date.now();
 						found = true;
-						d.locations[k].signal = device.signal;
 					}
 				}
 				
 				if(!found){
-					console.log("trying to push location")
-					d.locations.push({mac:node.mac, location:node.location, signal:device.signal});
+					let location = {mac:node.mac, ip:node.ip, location:node.location, seen:Date.now()};
+					if(device.signal && device.signal !== 'undefined' && device.signal !== 0 ){
+						
+						location.signal = device.signal;
+					}
+					d.locations.push(location);
 				}
-				d.lastSeen = Date.now();
-				d.save( (err) => {
+				
+				for(var i = d.locations.length; i <= 0; i--){
+					let location = d.locations[i];
+					if(location.seen.getTime() < Date.now()-10000){
+						console.log("Removing location from: "+d.hostname);
+						d.locations.splice(i,1);
+					}
+				}
+				
+				d.save((err)=>{
 					if(err){
-						console.log(err);
-						console.log("Error in device.js update save");
+						console.log("Error in Device.findOne() - d.save();");
+						console.log(err)
 					}
 				});
 			}
-		});*/
+			
+		});
+		
     }
 	
 	function findAll(callback){
@@ -123,7 +132,7 @@ module.exports = ( function () {
 	}
 	
 	function findThis(ip, agent, callback){
-		Device.findOne({ip:ip}, { '_id':0, '__v':0 },(err, d) => {
+		Device.findOne({ip:ip}, /*{ '_id':0, '__v':0 }, */(err, d) => {
 			
 			if(err){
 				callback({"error": "Device.findAll()"});
@@ -153,27 +162,28 @@ module.exports = ( function () {
 					delete d._id;
 					callback(d);
 					
-				});
-				
+				});	
 			}
-		
 		});
 	}
 	
 	function clean(){
-		
-		let cleanTime = Date.now() - 6000;
-		Device.find({}, (err, devices)=>{
+
+		let expire = Date.now() - 6000;
+		Device.find({}, (err, devices) => {
 			if(err){
-				callback({"error": "Device.clean()"});
-			} else {
-				for(var i = 0; i < devices.length; i++){
-					let lastSeen = new Date(devices[i].lastSeen).getTime();
-					if(lastSeen < cleanTime){
-						Device.remove({mac:devices[i].mac}, (err, d)=>{
-						});
-					}	
-				}
+				console.log("Error in device.js.clean()");
+				console.log(err.code);
+			}
+			for(var i = 0; i < devices.length;i++){
+				let device = devices[i];
+				let last = new Date(device.seen).getTime();
+				if(last < expire){
+					console.log("Removing device: "+device.hostname);
+					Device.remove({mac:device.mac}, (err, d)=>{
+						if(err){console.log(err.code);}
+					});
+				} 
 			}
 			
 		});

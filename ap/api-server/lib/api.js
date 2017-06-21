@@ -1,7 +1,7 @@
 'use strict';
 
 let Device = require( './models/device.js' );
-let Proximagicnode = require( './models/proximagicnode.js' );
+let Location = require( './models/location.js' );
 
 let api = {
     "^\/devices$": {
@@ -54,7 +54,7 @@ let api = {
 				
 				q.on( 'end', function () {
 					
-					Proximagicnode.upsert(JSON.parse(data));
+					Location.upsert(JSON.parse(data));
 				} );
                 
             } else {
@@ -65,7 +65,7 @@ let api = {
     "^\/locations$": {
         func: (q, r) => {
             if(q.method === "GET") {
-				Proximagicnode.findAll((response)=>{
+				Location.findAll((response)=>{
 					api.apiResponse(r, response);
 				});
             } else {
@@ -77,7 +77,7 @@ let api = {
         func: (q, r) => {
             if(q.method === "GET") {
 				let fragments = q.url.split( '/' ).filter( Boolean );
-				Proximagicnode.findByName(fragments[1], (response)=>{
+				Location.findByName(fragments[1], (response)=>{
 					api.apiResponse(r, response);
 				});
 				

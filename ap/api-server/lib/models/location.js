@@ -12,45 +12,50 @@ module.exports = ( function () {
         },
         ip: String,
 		location: String,
-        updatedAt: {
-            type: Date,
-            default: Date.now
-        }
+        seen: Date
     } );
 
-    let Location = mongoose.model( 'Location', proximagicNodeSchema );
+    let Location = mongoose.model( 'Location', LocationSchema );
 
     function upsert( node ) {
-		
+
 		let devices = node.devices;
+
 		Location.findOne({mac: node.mac}, (err, n)=>{
 			if(err){
-				console.log("Error in Location.upsert");
+				console.log("Error in location.js upsert");
 			}
 			if(!n){
 				
-				let location = new location({
+				let location= new Location({
 					mac:node.mac,
 					ip:node.ip,
-					location:node.location
+					location:node.location,
+					seen:Date.now()
 				});
 				
-				location.save((err)=>{
+				location.save((err, n)=>{
 					if(err){
 						console.log(err);
-						console.log("Error in proximagicnode.js upsert save");
+						console.log("Error in location.js upsert save");
 					}
+					
 					for(var i = 0; i < devices.length; i++){
-						device.upsert(devices[i], node);
+						device.upsert(devices[i], n);
 					}
 				})
 			} else {
-				//TODO update node
+				n.seen = Date.now();
 				for(var i = 0; i < devices.length; i++){
-					if(devices[i].ip !== '0.0.0.0'){
-						device.upsert(devices[i], n);
-					}
+					device.upsert(devices[i], n);
 				}
+				
+				n.save((err, n)=>{
+					if(err){
+						console.log(err);
+						console.log("Error in location.js upsert save");
+					}
+				})
 			}
 		});
     }
@@ -77,10 +82,32 @@ module.exports = ( function () {
 				callback(n)
 			}
 		});
-		
+	}
+	
+	function clean(){
+
+		let expire = Date.now() - 10000;
+		Location.find({}, (err, locations) => {
+			if(err){
+				console.log("Error in device.js.clean()");
+				console.log(err.code);
+			}
+			for(var i = 0; i < locations.length;i++){
+				let location = locations[i];
+				let last = new Date(location.seen).getTime();
+				if(last < expire){
+					console.log("Removing location: "+location.location);
+					Location.remove({mac:location.mac}, (err, d)=>{
+						if(err){console.log(err.code);}
+					});
+				} 
+			}
+			
+		});
 	}
 
     return Object.freeze( {
+		clean,
 		findAll,
         upsert,
 		findByName

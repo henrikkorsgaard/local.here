@@ -3,7 +3,7 @@
 	'use strict';
 	
 	process.title = 'proximagic-api-server';
-	let Proximagicnode = require( './lib/models/proximagicnode.js' );
+	let Location = require( './lib/models/location.js' );
 	let Device = require( './lib/models/device.js' );
 	var http = require( 'http' );
 	var api = require( './lib/api.js' ).api;
@@ -36,7 +36,7 @@
 		if ( !match ) {
 			api.apiResponse( response, {
 				status: 'error',
-				response: 'Unknown proximagic API request'
+				response: 'Unknown API request'
 			} );
 		}
 	}
@@ -45,7 +45,8 @@
 	
 	setInterval(()=>{
 		askAccessPoint();
-		//Device.clean();
+		Device.clean();
+		Location.clean();
 	}, 5000)
 	
 	
@@ -59,9 +60,7 @@
 				try {
 					let js = JSON.parse(data);
 					let obj = {};
-					obj.proximagicnode = {mac:js.mac,location:js.location, ip:js.ip};
-					obj.devices = js.devices;
-					Proximagicnode.upsert(obj);
+					Location.upsert(js);
 				} catch(e){
 					console.log("whaat")
 					console.log(e);
