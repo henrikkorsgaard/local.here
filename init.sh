@@ -1,6 +1,7 @@
 #!/bin/bash
 
 LOGFILE='/home/pi/proximagic.log'
+DEFAULT_SCAN_INTERVAL=5000;
 
 echo_time() {
     echo `date +'%b %e %R '` "$@"
@@ -64,6 +65,12 @@ start(){
 		
 		echo_time "Setting up as proximagic node" >> ${LOGFILE}
 		cd /home/pi/local.here/proximagic
+		
+		if [[ -n $interval ]]; then
+			echo_time "Setting scan interval" >> ${LOGFILE}
+			DEFAULT_SCAN_INTERVAL=$interval
+		fi
+		
 		echo '<?xml version="1.0" encoding="UTF-8" ?>' > settings.xml
         echo '<proximagicnode>' >> settings.xml
         echo '<debug>false</debug>' >> settings.xml
@@ -72,7 +79,7 @@ start(){
         echo '<ip>'$ip'</ip>' >> settings.xml
         echo '<horst host="localhost" port="4260" channel="6" />' >> settings.xml
         echo '<nmap target="192.168.1.0/24" interval="10000" />' >> settings.xml
-        echo '<db sendUrl="'$api_server'/location" sendTimer="'$interval'" uniqueId="3966383664303831383834633764363539613266656161306335356164303135" />' >> settings.xml
+        echo '<db sendUrl="'$api_server'/location" sendTimer="'$DEFAULT_SCAN_INTERVAL'" uniqueId="3966383664303831383834633764363539613266656161306335356164303135" />' >> settings.xml
         echo '<filter><bssid enabled="false">00:00:00:00:00:00</bssid><essid enabled="true">'$ssid'</essid></filter>' >> settings.xml
         echo '</proximagicnode>' >> settings.xml
 		
