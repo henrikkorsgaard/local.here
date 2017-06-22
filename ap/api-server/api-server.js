@@ -3,8 +3,52 @@
 	'use strict';
 	
 	process.title = 'proximagic-api-server';
-	let Location = require( './lib/models/location.js' );
-	let Device = require( './lib/models/device.js' );
+	const Location = require( './lib/models/location.js' );
+	const Device = require( './lib/models/device.js' );
+	
+	const WebSocket = require('ws');
+	const wss = new WebSocket.Server({ port: 8080 });
+	
+	wss.on('connection', (ws) => {
+		Location.addWebSocketConnection(ws);
+		Device.addWebSocketConnection(ws);
+		
+		ws.on('close', (ws)=>{
+			Location.removeWebSocketConnection(ws);
+			Device.removeWebSocketConnection(ws);
+		});
+		
+		ws.on('message', (msg) =>{
+			try {
+				let json = JSON.parse(msg);
+				switch(json.cmd) {
+					case "self":
+						api.getThis(ws, json);
+						break;
+					case "devices":
+						api.getDevices(ws, json);
+						break;
+					case "locations":
+						api.getLocations(ws, json);
+						break;
+					case "device":
+						api.getDevice(ws, json);
+						break;
+					case "location":
+						api.getLocation(ws, json);
+						break;
+					default:
+						let response = {error:"unknown command", token: json.token}
+						ws.send(JSON.stringify(response));
+				}
+			} catch(e){
+				let response = {error:"unable to parse message as json", token:"1337"}
+				ws.send(JSON.stringify(response));	
+			}
+			
+		});
+	});
+	
 	var http = require( 'http' );
 	var api = require( './lib/api.js' ).api;
 	
@@ -21,7 +65,6 @@
             response.end();
 			return;
         }
-		
 		
 		var match = false;
 		for ( var obj in api ) {
@@ -44,10 +87,10 @@
 
 	
 	setInterval(()=>{
-		askAccessPoint();
+		//askAccessPoint();
 		Device.clean();
 		Location.clean();
-	}, 5000)
+	}, 4000)
 	
 	
 	function askAccessPoint(){

@@ -28,9 +28,8 @@ let api = {
         func: (q, r) => {
             if(q.method === "GET") {
 				let ip = r.connection.remoteAddress;
-				let agent = q.headers['user-agent'];
 				
-                Device.findThis(ip,agent, (d) =>{
+                Device.findThis(ip, (d) =>{
                 	api.apiResponse(r, d);
                 });
 
@@ -76,7 +75,54 @@ let api = {
                 api.unsupportedMethod(q, r);
             }
         }
-    },	
+    },
+	getDevices: function(ws, msg){
+		Device.findAll((response)=>{
+			let data = {token: msg.token, data: response}
+			ws.send(JSON.stringify(data));
+		});
+		
+	},
+	getLocations: function(ws, msg){
+		Location.findAll((response)=>{
+			let data = {token: msg.token, data: response}
+			ws.send(JSON.stringify(data));
+		});	
+	},
+	getDevice: function(ws, msg){
+		if(msg.hasOwnProperty('mac')){
+			Device.findByMac(msg.mac.toLowerCase(), (resp)=> {
+				let response = {data: resp, token: msg.token}
+				ws.send(JSON.stringify(response));
+			});
+		} else if(msg.hasOwnProperty('name')){
+			Device.findByName(msg.name, (resp)=>{
+				let response = {data: resp, token: msg.token}
+				ws.send(JSON.stringify(response));
+			});
+		}
+	},
+	getLocation: function(ws, msg){
+		if(msg.hasOwnProperty('mac')){
+			Location.findByMac(msg.mac.toLowerCase(), (resp)=> {
+				let response = {data: resp, token: msg.token}
+				ws.send(JSON.stringify(response));
+			});
+		} else if(msg.hasOwnProperty('name')){
+			Location.findByName(msg.name, (resp)=>{
+				let response = {data: resp, token: msg.token}
+				ws.send(JSON.stringify(response));
+			});
+		}
+	},
+	getThis: function(ws, msg){
+		let ip = ws._socket.remoteAddress;
+		ip = ip.replace(/^.*:/, '');
+        Device.findThis(ip, (d) =>{
+			let response = {data: d, token: msg.token}
+			ws.send(JSON.stringify(response));
+		});
+	},
     unsupportedMethod: (q, r) => {
         api.apiResponse(r, {
             status: 'error',
