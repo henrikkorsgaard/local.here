@@ -31,7 +31,7 @@ start(){
 		sudo mount -t tmpfs -o size=64M tmpfs /ramdata/
 		sudo systemctl start mongodb
 
-		sudo nodejs /home/pi/local.here/ap/api-server/api-server.js 1>/dev/null 2> ${LOGFILE} &
+		sudo forever /home/pi/local.here/context-server/api-server.js &
 	fi
 
 	if [[ $proximagic = true ]]; then
@@ -92,7 +92,6 @@ stop(){
 	echo_time "Stopping local.here / Proximagic" >> ${LOGFILE}
 	sudo pkill -9 java
 	sudo pkill -9 horst
-	
 }
 
 
