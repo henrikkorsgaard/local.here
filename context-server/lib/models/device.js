@@ -2,7 +2,7 @@ module.exports = (function() {
 	'use strict';
 	let mongoose = require('mongoose');
 	let Schema = mongoose.Schema;
-
+	let vendor = require('./vendor.js');
 	let macRegExp = /^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$/;
 
 	let deviceSchema = new Schema({
@@ -17,6 +17,7 @@ module.exports = (function() {
 			signal: Number,
 			seen: Date
 		}],
+		type: String,
 		ip: String,
 		vendor: String,
 		hostname: String,
@@ -40,41 +41,40 @@ module.exports = (function() {
 			if(ws.readyState === 1){
 				ws.send(JSON.stringify(msg));
 			}
-			
 		});
 	}
-
-	function upsert(device, node) {
-		if (device.mac.match(macRegExp)) {
-			let device_mac = device.mac.toLowerCase();
-
-			Device.findOne({
-				mac: device_mac
-			}, (err, d) => {
-
-				if (err) {
-					console.log("Error in Device.findOne();");
-					console.log(err.code)
-				} else if (!d) {
-
+	
+	function upsert(device, node, retry) {
+		
+		let mac = device.mac.toLowerCase();
+		if(global.excludedMacAddresses.indexOf(mac) < 0){
+			Device.findOne({mac:mac}, (err, d)=>{
+				if(err){
+					console.log("Error in Device.upsert(). Code: "+err.code);
+				} else if(!d) {
+					
 					let location = {
 						mac: node.mac,
 						ip: node.ip,
 						location: node.location,
 						seen: Date.now()
 					};
+					
 					if (device.signal && device.signal !== 'undefined' && device.signal !== 0) {
-						location.signal =
-							device.signal;
+						location.signal = device.signal;
+						device.type = 'wireless';
+					} else {
+						device.type = 'wired';
 					}
-
+					
 					d = new Device({
-						mac: device_mac,
+						mac: mac,
 						ip: device.ip,
 						seen: Date.now(),
-						locations: [location]
+						locations: [location],
+						type:device.type
 					});
-
+					
 					if (device.hasOwnProperty("hostname") && device.hostname !== "unknown") {
 						d.hostname = device.hostname;
 					}
@@ -82,29 +82,25 @@ module.exports = (function() {
 					if (device.hasOwnProperty("vendor") && device.vendor !== "Unknown") {
 						d.vendor = device.vendor;
 					}
+					
 					d.save((err, d) => {
-						if (err) {
-							console.log("Error in Device.findOne() - d.save();");
-							console.log(err.code);
-							d.save((err, d) => {
-								if(err){
-									console.log("Error in Device.findOne() - d.save() --- AGAIN;");
-									console.log(err.code);
-								} else {
-									webSocketSend({
-										event: "deviceJoin",
-										data: {device: d}
-									});
-								}
-							});
+						if(err){
+							console.log("Error in Device.upsert() new device.save(). Code: "+err.code);
+
+							if(!retry){
+								console.log("Trying again with " + mac);
+								upsert(device, node, true);
+							} else {
+								console.log("This failed a second time " + mac);
+							}
+
 						} else {
-							webSocketSend({
-								event: "deviceJoin",
-								data: {device: d}
-							});
+							if(!device.hasOwnProperty('vendor') || device.vendor === "Unknown"){
+								addVendor(device.mac);
+							}
 						}
 					});
-
+					
 				} else {
 					if (device.ip !== "0.0.0.0") {
 						d.ip = device.ip;
@@ -115,11 +111,7 @@ module.exports = (function() {
 					if (!d.hasOwnProperty("hostname") && device.hasOwnProperty("hostname") && device.hostname !== "unknown") {
 						d.hostname = device.hostname;
 					}
-
-					if (!d.hasOwnProperty("vendor") && device.hasOwnProperty("vendor") && device.vendor !== "Unknown") {
-						d.vendor = device.vendor;
-					}
-
+					
 					var found = false;
 					for (var i = 0; i < d.locations.length; i++) {
 						var location = d.locations[i];
@@ -127,6 +119,7 @@ module.exports = (function() {
 							if (device.signal && device.signal !== 'undefined' &&
 								device.signal !== 0 && location.signal !== device.signal) {
 								location.signal = device.signal;
+								d.type = 'wireless';
 								webSocketSend({
 									event: "deviceSignalChange",
 									data: {device: d, location: location}
@@ -177,13 +170,21 @@ module.exports = (function() {
 						if (err) {
 							console.log("Error in Device.findOne() - d.save();");
 							console.log(err)
+							if(!retry){
+								console.log("Trying again in Device.findOne() - d.save()with " + mac);
+								upsert(device, node, true);
+							} else {
+								console.log("This failed a second time " + mac);
+							}
+						} else {
+							if(!device.hasOwnProperty('vendor') || device.vendor === "Unknown"){
+								addVendor(device.mac);
+							}
 						}
 					});
 				}
-
 			});
 		} else {
-			console.log("unknown mac address:  " + device.mac);
 		}
 	}
 
@@ -198,10 +199,19 @@ module.exports = (function() {
 				});
 			} else if (!devices) {
 				callback({
-					"this": "that"
+					"Error": "No devices found!"
 				});
 			} else {
-				callback(devices)
+				let returnDevices = [];
+				for(var d = 0; d < devices.length; d++){
+					let device = devices[d].toJSON();
+					var locations = device.locations;
+					for(var l = 0; l < locations.length; l++){
+						delete locations[l]['_id'];
+					}
+					returnDevices.push(device);
+				}
+				callback(returnDevices)
 			}
 		});
 	}
@@ -282,13 +292,27 @@ module.exports = (function() {
 					"error": "device unknown"
 				});
 			}
-
+		});
+	}
+	
+	function findByLocation(locationMac, callback){
+		Device.find({'locations.mac':locationMac},{
+			'_id': 0,
+			'__v': 0, 
+			'locations':0
+		}, (err, devices) => {
+			if(err){
+				console.log("Error in device.js FindByLocation()");
+				callback([]);
+			} else {
+				callback(devices);
+			}
 		});
 	}
 
 	function clean() {
 
-		let expire = Date.now() - 7000;
+		let expire = Date.now() - 15000;
 		Device.find({}, (err, devices) => {
 			if (err) {
 				console.log("Error in device.js.clean()");
@@ -320,7 +344,16 @@ module.exports = (function() {
 					});
 				}
 			}
-
+		});
+	}
+	
+	function addVendor(mac){
+		vendor.getVendor(mac, (vendor)=>{
+			Device.findOneAndUpdate({mac:mac}, {vendor:vendor.vendor}, (err)=>{
+				if(err){
+					console.log("Error in device.js,addVendor(), findOneAndUpdate(): "+err.code);
+				}
+			});
 		});
 	}
 
@@ -329,6 +362,7 @@ module.exports = (function() {
 		findAll,
 		findByName,
 		findByMac,
+		findByLocation,
 		upsert,
 		clean,
 		addWebSocketConnection,

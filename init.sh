@@ -34,7 +34,7 @@ start(){
 	fi
 
 	if [[ $proximagic = true ]]; then
-		
+		echo "something proximagic"
 		if [[ -z $location || -z $ssid || -z $password ]]; then
 			echo_time "Incorrect configuration file /boot/proximagic.config" >> ${LOGFILE}
 			exit
@@ -64,6 +64,12 @@ start(){
 		
 		echo_time "Setting up as proximagic node" >> ${LOGFILE}
 		cd /home/pi/local.here/proximagic
+		
+		if [[ -n "$interval" ]]; then
+			echo $interval
+			echo_time "Incorrect configuration file /boot/proximagic.config" >> ${LOGFILE}			
+		fi
+		
 		echo '<?xml version="1.0" encoding="UTF-8" ?>' > settings.xml
         echo '<proximagicnode>' >> settings.xml
         echo '<debug>false</debug>' >> settings.xml
@@ -76,8 +82,8 @@ start(){
         echo '<filter><bssid enabled="false">00:00:00:00:00:00</bssid><essid enabled="true">'$ssid'</essid></filter>' >> settings.xml
         echo '</proximagicnode>' >> settings.xml
 		
-		sudo horst -i wlan0 -N -p 4260 &>/dev/null &
-		sudo java -jar ProxiMagicNode.jar &> /dev/null &
+		##sudo horst -i wlan0 -N -p 4260 &>/dev/null &
+		##sudo java -jar ProxiMagicNode.jar &> /dev/null &
 	fi
 }
 

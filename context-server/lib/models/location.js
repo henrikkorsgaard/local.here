@@ -1,6 +1,5 @@
 module.exports = ( function () {
     'use strict';
-
     let mongoose = require( 'mongoose' );
 	let device = require( './device.js' );
     let Schema = mongoose.Schema;
@@ -36,16 +35,15 @@ module.exports = ( function () {
 	}
 		
 
-    function upsert( node ) {
+    function upsert( node, retry ) {
 
 		let devices = node.devices;
-
+		global.excludedMacAddresses.push(node.mac.toLowerCase());
 		Location.findOne({mac: node.mac}, (err, n)=>{
 			if(err){
 				console.log("Error in location.js upsert");
 			}
 			if(!n){
-				
 				let location= new Location({
 					mac:node.mac,
 					ip:node.ip,
@@ -56,23 +54,29 @@ module.exports = ( function () {
 				location.save((err, n)=>{
 					if(err){
 						console.log(err.code);
-						console.log("Error in location.js upsert save");
+						console.log("Error in location.js upsert save insert");
+						if(!retry){
+							console.log("trying to upsert location again!");
+							upsert(node, true);
+						} else {
+							console.log("Error in location.js save insert. Failed second time: "+node.location);
+						}
+					} else {
+						for(var i = 0; i < devices.length; i++){
+							device.upsert(devices[i], n);
+						}
 					}
-					
-					for(var i = 0; i < devices.length; i++){
-						device.upsert(devices[i], n);
-					}
-				})
+				});
 			} else {
 				n.seen = Date.now();
 				for(var i = 0; i < devices.length; i++){
-					device.upsert(devices[i], n);
+					device.upsert(devices[i], node);
 				}
 				
 				n.save((err, n)=>{
 					if(err){
 						console.log(err);
-						console.log("Error in location.js upsert save");
+						console.log("Error in location.js upsert save update");
 					}
 				})
 			}
@@ -84,9 +88,23 @@ module.exports = ( function () {
 			if(err){
 				callback({"error": "Device.findAll()"});
 			} else if (!nodes){
-				callback({});
+				callback([]);
 			} else {
-				callback(nodes)
+				let locationsToReturn = [];
+				for(var l = 0; l < nodes.length; l++){
+					let location = nodes[l].toJSON();
+					device.findByLocation(location.mac, (devices)=>{
+						location.devices = devices;
+						locationsToReturn.push(location);
+						returnLocations();
+					})
+				}
+				
+				function returnLocations(){
+					if(nodes.length === locationsToReturn.length){
+						callback(locationsToReturn);
+					}
+				}
 			}
 		});
 	}
