@@ -3,6 +3,7 @@ module.exports = (function() {
 	let mongoose = require('mongoose');
 	let Schema = mongoose.Schema;
 	let vendor = require('./vendor.js');
+	let exec = require(‘child_process’).exec;
 	let macRegExp = /^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$/;
 
 	let deviceSchema = new Schema({
@@ -322,6 +323,14 @@ module.exports = (function() {
 				let device = devices[i];
 				let last = new Date(device.seen).getTime();
 				if (last < expire) {
+					/*
+					DO THIS TO CHECK YOU ARE NOT REMOVING DEVICE THAT IS STILL THERE
+					exec(‘ping -c 1 ‘+device.ip, {timeout:100}, function(error, stdout, stderr) {
+						if(error || stderr){
+							device.remove(device.ip);
+						}
+					});*/
+					
 					webSocketSend({
 						event: "deviceLeft",
 						data: {device:device}
