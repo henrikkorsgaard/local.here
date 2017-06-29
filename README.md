@@ -19,6 +19,20 @@ The documentation is as is and for an audience of 1 - my bad memory ;)
 2. USB WIFI device (with monitor mode capability).
 3. Minimum 4gb SD card
 
+## Development
+
+### Clear Database
+
+```
+$> mongo
+$> use proximagic
+$> db.devices.drop()
+$> db.locations.drop()
+```
+
+### Restart context-server
+`sudo forever restartall`
+
 ## What it does
 tbw
 
