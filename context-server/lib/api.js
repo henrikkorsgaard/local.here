@@ -76,6 +76,17 @@ let api = {
             }
         }
     },
+    "^\/places$": {
+        func: (q, r) => {
+            if(q.method === "GET") {
+				Location.findAll((response)=>{
+					api.apiResponse(r, response);
+				});
+            } else {
+                api.unsupportedMethod(q, r);
+            }
+        }
+    },
 	getDevices: function(ws, msg){
 		Device.findAll((response)=>{
 			let data = {token: msg.token, data: response}
@@ -84,6 +95,12 @@ let api = {
 		
 	},
 	getLocations: function(ws, msg){
+		Location.findAll((response)=>{
+			let data = {token: msg.token, data: response}
+			ws.send(JSON.stringify(data));
+		});	
+	},
+	getPlaces: function(ws, msg){
 		Location.findAll((response)=>{
 			let data = {token: msg.token, data: response}
 			ws.send(JSON.stringify(data));

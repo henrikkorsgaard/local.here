@@ -105,6 +105,6 @@
 	setInterval(()=>{
 		Device.clean();
 		Location.clean();
-	}, 4000)
+	}, 4000);
 	
 }() );

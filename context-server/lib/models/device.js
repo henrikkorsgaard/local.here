@@ -3,7 +3,7 @@ module.exports = (function() {
 	let mongoose = require('mongoose');
 	let Schema = mongoose.Schema;
 	let vendor = require('./vendor.js');
-	let exec = require(‘child_process’).exec;
+	let exec = require('child_process').exec;
 	let macRegExp = /^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$/;
 
 	let deviceSchema = new Schema({
@@ -14,11 +14,15 @@ module.exports = (function() {
 		},
 		locations: [{
 			mac: String,
-			location: String,
+			name: String,
 			signal: Number,
 			seen: Date
 		}],
-		type: String,
+		_complete: Boolean,
+		type: {
+			type: String,
+			default: "wired"
+		},
 		ip: String,
 		vendor: String,
 		hostname: String,
@@ -39,160 +43,232 @@ module.exports = (function() {
 
 	function webSocketSend(msg) {
 		connections.forEach((ws) => {
-			if(ws.readyState === 1){
+			if (ws.readyState === 1) {
 				ws.send(JSON.stringify(msg));
 			}
 		});
 	}
-	
-	function upsert(device, node, retry) {
-		
-		let mac = device.mac.toLowerCase();
-		if(global.excludedMacAddresses.indexOf(mac) < 0){
-			Device.findOne({mac:mac}, (err, d)=>{
-				if(err){
-					console.log("Error in Device.upsert(). Code: "+err.code);
-				} else if(!d) {
-					
-					let location = {
-						mac: node.mac,
-						ip: node.ip,
-						location: node.location,
-						seen: Date.now()
-					};
-					
-					if (device.signal && device.signal !== 'undefined' && device.signal !== 0) {
-						location.signal = device.signal;
-						device.type = 'wireless';
-					} else {
-						device.type = 'wired';
-					}
-					
-					d = new Device({
+
+	/**
+	 * Returns true if the device data is from the proximity
+	 * scanner.
+	 */
+	const isProximityScanner = (deviceData) => {
+		return deviceData.hasOwnProperty("signal");
+	};
+
+	const isNMAPScanner = (deviceData) => {
+		return deviceData.hasOwnProperty("hostname");
+	};
+
+	const isDeviceComplete = (device) => {
+		return device._complete; //will turn the undefined into false
+	};
+
+	function upsert(deviceData, node, retry) {
+
+		let mac = deviceData.mac.toLowerCase();
+
+		// ignore router and nodes
+		if (global.excludedMacAddresses.indexOf(mac) > -1) {
+			return;
+		}
+
+		Device.findOne({
+			mac: mac
+		}, (error, device) => {
+			if (error) {
+				console.error("Error in Device.upsert() at FindOne(). Code: " + error.code);
+				return;
+			}
+
+			// create a global now
+			const NOW = Date.now();
+
+			// device does not exist in database
+			if (!device) {
+
+				// create location
+				let location = {
+					mac: node.mac,
+					ip: node.ip,
+					name: node.location,
+					seen: NOW
+				};
+
+				// message from nmap scanning
+				if (isNMAPScanner(deviceData)) {
+					device = new Device({
 						mac: mac,
-						ip: device.ip,
-						seen: Date.now(),
+						type: "wired",
+						hostname: deviceData.hostname,
+						ip: deviceData.ip,
 						locations: [location],
-						type:device.type
+						seen: NOW,
+						_complete: false
 					});
-					
-					if (device.hasOwnProperty("hostname") && device.hostname !== "unknown") {
-						d.hostname = device.hostname;
-					}
+				}
+				// message from proximity scanner
+				else {
 
-					if (device.hasOwnProperty("vendor") && device.vendor !== "Unknown") {
-						d.vendor = device.vendor;
-					}
-					
-					d.save((err, d) => {
-						if(err){
-							console.log("Error in Device.upsert() new device.save(). Code: "+err.code);
+					// update device's signal for current location
+					location.signal = deviceData.signal;
 
-							if(!retry){
-								console.log("Trying again with " + mac);
-								upsert(device, node, true);
-							} else {
-								console.log("This failed a second time " + mac);
-							}
+					// create new device based on proximity scanner data
+					device = new Device({
+						mac: mac,
+						type: "wireless",
+						locations: [location],
+						seen: NOW,
+						_complete: false,
+					});
+				}
 
+				device.save((error) => {
+					if (error) {
+						console.error("Error in Device.upsert() at save(). Code: " + error.code);
+
+						if (!retry) {
+							console.warn("Trying again with " + mac);
+							upsert(deviceData, node, true);
 						} else {
-							if(!device.hasOwnProperty('vendor') || device.vendor === "Unknown"){
-								addVendor(device.mac);
-							}
-						}
-					});
-					
-				} else {
-					if (device.ip !== "0.0.0.0") {
-						d.ip = device.ip;
-					}
-
-					d.seen = Date.now();
-
-					if (!d.hasOwnProperty("hostname") && device.hasOwnProperty("hostname") && device.hostname !== "unknown") {
-						d.hostname = device.hostname;
-					}
-					
-					var found = false;
-					for (var i = 0; i < d.locations.length; i++) {
-						var location = d.locations[i];
-						if (location.mac === node.mac) {
-							if (device.signal && device.signal !== 'undefined' &&
-								device.signal !== 0 && location.signal !== device.signal) {
-								location.signal = device.signal;
-								d.type = 'wireless';
-								webSocketSend({
-									event: "deviceSignalChange",
-									data: {device: d, location: location}
-								});
-							}
-							location.seen =
-								Date.now();
-							found = true;
-						}
-					}
-
-					if (!found) {
-						let location = {
-							mac: node.mac,
-							ip: node.ip,
-							location: node.location,
-							seen: Date.now()
-						};
-						if (device.signal && device.signal !== 'undefined' && device.signal !== 0) {
-							location.signal = device.signal;
+							console.error("This failed a second time " + mac);
 						}
 
-						d.locations.push(location);
-						webSocketSend({
-							event: "deviceJoinedLocation", data: {
-								device: d,
-								location: location
+					} else {
+						addVendor(deviceData.mac);
+					}
+				});
+
+			}
+			// device exists
+			else {
+
+				// update device seen time
+				device.seen = NOW;
+
+				// message from nmap scanning
+				if (isNMAPScanner(deviceData)) {
+					device.hostname = deviceData.hostname;
+					device.ip = deviceData.ip;
+				}
+				// message from proximity scanner
+				else {
+
+					// device is wireless because the proximity scanner cannot see wired devices
+					device.type = "wireless";
+				}
+
+				// queue to add events that will be emitted once the device is persisted in the database
+				let eventsToEmit = [];
+
+				// check if device has node's location
+				let location = device.locations.find((location) => location.mac === node.mac);
+
+				// device has node's location already
+				if (location) {
+					// checks if the signal is updated and then adds an event to trigger a signal change event
+					if (deviceData.signal && deviceData.signal !== location.signal) {
+						location.signal = deviceData.signal;
+
+						eventsToEmit.push({
+							event: "deviceSignalChange",
+							data: {
+								device,
+								location
 							}
 						});
 					}
+				}
+				// location does not exist for device
+				else {
+					let location = {
+						mac: node.mac,
+						ip: node.ip,
+						name: node.location,
+						signal: deviceData.signal,
+						seen: NOW
+					};
 
-					for (var i = d.locations.length; i <= 0; i--) {
-						let location = d.locations[i];
-						if (location.seen.getTime() < Date.now() - 10000) {
-							console.log("Removing location from: " + d.hostname);
-							d.locations.splice(i, 1);
-							webSocketSend({
-								event: "deviceLeftLocation",
-								data: {
-									device: d,
-									location: location
-								}
-							});
-						}
-					}
+					// add location to device
+					device.locations.push(location);
 
-					d.save((err) => {
-						if (err) {
-							console.log("Error in Device.findOne() - d.save();");
-							console.log(err)
-							if(!retry){
-								console.log("Trying again in Device.findOne() - d.save()with " + mac);
-								upsert(device, node, true);
-							} else {
-								console.log("This failed a second time " + mac);
-							}
-						} else {
-							if(!device.hasOwnProperty('vendor') || device.vendor === "Unknown"){
-								addVendor(device.mac);
-							}
+					eventsToEmit.push({
+						event: "deviceJoinedLocation",
+						data: {
+							device,
+							location
 						}
 					});
 				}
-			});
-		} else {
-		}
+
+
+
+				// device is only complete if it has property _complete set to true AND it has a hostname AND
+				// it has an IP
+				let deviceIsComplete = !isDeviceComplete(device) && device.hostname && device.ip;
+
+				if (deviceIsComplete) {
+
+					// set device to be _complete because it has data from proximity sensor and the nmap scan
+					device._complete = true;
+
+					eventsToEmit.push({
+						event: "deviceJoin",
+						data: {
+							device
+						}
+					});
+				}
+
+				// get all locations that has been seen by the device in the last 5 seconds
+				const timeoutTime = NOW - 5000;
+				//const wiredTimeoutTime = NOW - 15000; //15000ms should put us on the safe side of NMAP scans
+
+
+				for (var i = device.locations.length; i <= 0; i--) {
+					let location = device.locations[i];
+					if (location.seen < timeoutTime) {
+						console.log("Removing location from: " + device.hostname);
+						device.locations.splice(i, 1);
+						eventsToEmit.push({
+							event: "deviceLeftLocation",
+							data: {
+								device,
+								location
+							}
+						});
+					}
+				}
+
+				device.save((error, device) => {
+					if (error) {
+						console.error("Error in Device.upsert() at save() after update. Code: " + error.code);
+
+						if (!retry) {
+							upsert(deviceData, node, true);
+						} else {
+							console.warn("This failed a second time " + mac);
+						}
+					}
+					//if first time complete, then emit deviceJoin
+					else {
+						if (isDeviceComplete(device)) {
+							eventsToEmit.forEach((event) => {
+								webSocketSend(event);
+							});
+						}
+					}
+				});
+			}
+		});
 	}
 
 	function findAll(callback) {
 		Device.find({}, {
 			'_id': 0,
-			'__v': 0
+			'__v': 0,
+			'_complete': 0
 		}, (err, devices) => {
 			if (err) {
 				callback({
@@ -204,10 +280,10 @@ module.exports = (function() {
 				});
 			} else {
 				let returnDevices = [];
-				for(var d = 0; d < devices.length; d++){
+				for (var d = 0; d < devices.length; d++) {
 					let device = devices[d].toJSON();
 					var locations = device.locations;
-					for(var l = 0; l < locations.length; l++){
+					for (var l = 0; l < locations.length; l++) {
 						delete locations[l]['_id'];
 					}
 					returnDevices.push(device);
@@ -248,6 +324,7 @@ module.exports = (function() {
 					closestLocation;
 				delete d.__v;
 				delete d._id;
+				delete d._complete;
 				callback(d);
 			}
 		});
@@ -295,14 +372,17 @@ module.exports = (function() {
 			}
 		});
 	}
-	
-	function findByLocation(locationMac, callback){
-		Device.find({'locations.mac':locationMac},{
+
+	function findByLocation(locationMac, callback) {
+		Device.find({
+			'locations.mac': locationMac
+		}, {
 			'_id': 0,
-			'__v': 0, 
-			'locations':0
+			'__v': 0,
+			'_complete': 0,
+			'locations._id': 0
 		}, (err, devices) => {
-			if(err){
+			if (err) {
 				console.log("Error in device.js FindByLocation()");
 				callback([]);
 			} else {
@@ -313,7 +393,6 @@ module.exports = (function() {
 
 	function clean() {
 
-		let expire = Date.now() - 15000;
 		Device.find({}, (err, devices) => {
 			if (err) {
 				console.log("Error in device.js.clean()");
@@ -321,50 +400,57 @@ module.exports = (function() {
 			}
 			for (var i = 0; i < devices.length; i++) {
 				let device = devices[i];
-				let last = new Date(device.seen).getTime();
-				if (last < expire) {
-					/*
-					DO THIS TO CHECK YOU ARE NOT REMOVING DEVICE THAT IS STILL THERE
-					exec(‘ping -c 1 ‘+device.ip, {timeout:100}, function(error, stdout, stderr) {
-						if(error || stderr){
-							device.remove(device.ip);
-						}
-					});*/
-					
-					webSocketSend({
-						event: "deviceLeft",
-						data: {device:device}
-					});
+
+				if (global.excludedMacAddresses.indexOf(device.mac) !== -1) {
 					Device.remove({
 						mac: device.mac
 					}, (err, d) => {
 						if (err) {
-							console.log(err.code);
+							console.log(err);
 						}
 					});
-				} else if (device.mac === "<incomplete>") {
-					webSocketSend( {event: "deviceLeft",	data: {device:device}});
-					Device.remove({
-						mac: device.mac
-					}, (err, d) => {
-						if (err) {
-							console.log(err.code);
+
+				} else if (device.hostname) {
+					exec('ping -c 1 ' + device.ip, {
+						timeout: 1000
+					}, function(error, stdout, stderr) {
+						if (stderr || error) {
+							Device.remove({
+								mac: device.mac
+							}, (err, d) => {
+								if (err) {
+									console.log(err);
+								}
+
+								webSocketSend({
+									event: "deviceLeft",
+									data: {
+										device
+									}
+								});
+								console.log("Device removed " + device.hostname + " (mac: " + device.mac + ")");
+							});
 						}
 					});
 				}
 			}
 		});
 	}
-	
-	function addVendor(mac){
-		vendor.getVendor(mac, (vendor)=>{
-			Device.findOneAndUpdate({mac:mac}, {vendor:vendor.vendor}, (err)=>{
-				if(err){
-					console.log("Error in device.js,addVendor(), findOneAndUpdate(): "+err.code);
+
+	function addVendor(mac) {
+		vendor.getVendor(mac, (vendor) => {
+			Device.findOneAndUpdate({
+				mac: mac
+			}, {
+				vendor: vendor.vendor
+			}, (err) => {
+				if (err) {
+					console.log("Error in device.js,addVendor(), findOneAndUpdate(): " + err.code);
 				}
 			});
 		});
 	}
+
 
 	return Object.freeze({
 		findThis,

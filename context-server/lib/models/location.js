@@ -10,7 +10,7 @@ module.exports = ( function () {
             unique: true
         },
         ip: String,
-		location: String,
+		name: String,
         seen: Date
     } );
 
@@ -38,7 +38,11 @@ module.exports = ( function () {
     function upsert( node, retry ) {
 
 		let devices = node.devices;
-		global.excludedMacAddresses.push(node.mac.toLowerCase());
+		if(global.excludedMacAddresses.indexOf(node.mac.toLowerCase()) < 0){
+			global.excludedMacAddresses.push(node.mac.toLowerCase());
+			return;
+		}
+		
 		Location.findOne({mac: node.mac}, (err, n)=>{
 			if(err){
 				console.log("Error in location.js upsert");
@@ -47,7 +51,7 @@ module.exports = ( function () {
 				let location= new Location({
 					mac:node.mac,
 					ip:node.ip,
-					location:node.location,
+					name:node.location,
 					seen:Date.now()
 				});
 				
@@ -122,7 +126,7 @@ module.exports = ( function () {
 	}
 	
 	function findByName(name, callback){
-		Location.find({location:name}, { '_id':0, '__v':0 }, (err, nodes) => {
+		Location.find({name:name}, { '_id':0, '__v':0 }, (err, nodes) => {
 			if(err){
 				callback({"error": "Device.findByName()"});
 			} else if (!nodes){
